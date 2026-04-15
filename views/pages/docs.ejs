@@ -1,0 +1,120 @@
+<section class="docs-section">
+  <h1 class="title">API Documentation</h1>
+  <p class="intro">Complete reference for the MiniMedium API. All endpoints are self-discoverable at <code>/api</code>.</p>
+
+  <div class="section">
+    <h2 class="title is-4">Authentication</h2>
+    <p>Most endpoints are public. Protected endpoints require the <code>X-Auth-Token</code> header:</p>
+    <pre><code>X-Auth-Token: your-auth-token-here</code></pre>
+    <p>Get your token from the <a href="/onboarding">onboarding</a> page (first time) or <code>GET /api/settings</code>.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="title is-4">Public Endpoints</h2>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-get">GET</span> /api</h3>
+      <p>Returns this API documentation in JSON format.</p>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-get">GET</span> /api/posts</h3>
+      <p>List all blog posts with pagination.</p>
+      <p><strong>Query Parameters:</strong></p>
+      <ul>
+        <li><code>page</code> - Page number (default: 1)</li>
+        <li><code>limit</code> - Posts per page (default: 10)</li>
+      </ul>
+      <pre><code>curl http://localhost:8080/api/posts?page=1&limit=5</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-get">GET</span> /api/posts/:slug</h3>
+      <p>Get a single post by its URL slug.</p>
+      <pre><code>curl http://localhost:8080/api/posts/my-post-slug</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-get">GET</span> /api/settings</h3>
+      <p>Get blog settings (title, author, description).</p>
+      <pre><code>curl http://localhost:8080/api/settings</code></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="title is-4">Protected Endpoints</h2>
+    <p>These require a valid <code>X-Auth-Token</code> header.</p>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-post">POST</span> /api/posts</h3>
+      <p>Create a new blog post.</p>
+      <p><strong>Required:</strong> <code>title</code>, <code>body</code></p>
+      <p><strong>Optional:</strong> <code>tags</code> (array)</p>
+      <pre><code>curl -X POST http://localhost:8080/api/posts \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: YOUR_TOKEN" \
+  -d '{"title": "My Post", "body": "Content here", "tags": ["tech"]}'</code></pre>
+      <p><strong>Auto-generated:</strong> <code>slug</code>, <code>keywords</code>, <code>meta_description</code>, <code>reading_time</code></p>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-put">PUT</span> /api/posts/:slug</h3>
+      <p>Update an existing post. Only include fields you want to change.</p>
+      <pre><code>curl -X PUT http://localhost:8080/api/posts/my-post-slug \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: YOUR_TOKEN" \
+  -d '{"title": "New Title"}'</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-delete">DELETE</span> /api/posts/:slug</h3>
+      <p>Delete a post by its slug.</p>
+      <pre><code>curl -X DELETE http://localhost:8080/api/posts/my-post-slug \
+  -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-put">PUT</span> /api/settings</h3>
+      <p>Update blog settings.</p>
+      <p><strong>Optional:</strong> <code>title</code>, <code>author</code>, <code>description</code>, <code>show_docs</code></p>
+      <pre><code>curl -X PUT http://localhost:8080/api/settings \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: YOUR_TOKEN" \
+  -d '{"title": "New Title", "author": "New Author", "show_docs": true}'</code></pre>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="title is-4">Response Examples</h2>
+
+    <div class="endpoint">
+      <h3>Post Object</h3>
+      <pre><code>{
+  "id": "uuid",
+  "title": "My Post",
+  "slug": "my-post",
+  "body": "Content...",
+  "bodyHtml": "&lt;p&gt;Content...&lt;/p&gt;",
+  "excerpt": "First 160 chars...",
+  "coverImage": "",
+  "keywords": "keyword1, keyword2",
+  "metaDescription": "Meta description...",
+  "readingTime": 2,
+  "tags": ["tech"],
+  "createdAt": "2026-04-08T12:00:00Z",
+  "updatedAt": "2026-04-08T12:00:00Z"
+}</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3>Settings Object</h3>
+      <pre><code>{
+  "title": "My Blog",
+  "author": "John Doe",
+  "description": "A blog about tech",
+  "onboardingComplete": true,
+  "showDocs": true
+}</code></pre>
+    </div>
+  </div>
+</section>

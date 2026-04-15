@@ -1,0 +1,16 @@
+<nav class="navbar is-white" role="navigation" aria-label="main navigation">
+  <div class="container">
+    <div class="navbar-brand">
+      <a class="navbar-item logo" href="/">
+        <%= settings.title %>
+      </a>
+    </div>
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <% if (settings.author) { %>
+          <span class="has-text-grey-light">by <%= settings.author %></span>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

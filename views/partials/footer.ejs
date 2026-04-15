@@ -1,0 +1,19 @@
+<footer class="footer light-footer">
+  <div class="container">
+    <div class="level">
+      <div class="level-left">
+        <div class="level-item">
+          <p>&copy; <%= new Date().getFullYear() %> <%= settings.title %></p>
+        </div>
+      </div>
+      <div class="level-right">
+        <div class="level-item">
+          <% if (settings.show_docs !== false) { %>
+          <a href="/docs">Docs</a>
+          <% } %>
+          <a href="/api">API</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
