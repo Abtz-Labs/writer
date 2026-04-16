@@ -15,7 +15,7 @@
       <div class="field">
         <label class="label" for="author">What is your name (the author)?</label>
         <div class="control">
-          <input class="input" type="text" id="author" name="author" placeholder="John Doe">
+          <input class="input" type="text" id="author" name="author" required placeholder="John Doe">
         </div>
       </div>
       <div class="field">
@@ -24,6 +24,29 @@
           <textarea class="textarea" id="description" name="description" placeholder="A blog about..."></textarea>
         </div>
       </div>
+
+      <hr>
+      <p class="has-text-grey mb-4">Set up credentials for accessing the admin panel.</p>
+
+      <div class="field">
+        <label class="label" for="username">Username</label>
+        <div class="control">
+          <input class="input" type="text" id="username" name="username" required placeholder="admin">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="password">Password</label>
+        <div class="control">
+          <input class="input" type="password" id="password" name="password" required placeholder="••••••••">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="confirmPassword">Confirm Password</label>
+        <div class="control">
+          <input class="input" type="password" id="confirmPassword" name="confirmPassword" required placeholder="••••••••">
+        </div>
+      </div>
+
       <button type="submit" class="button is-primary is-fullwidth">Set Up Blog</button>
     </form>
   </div>
@@ -43,10 +66,18 @@
 <script>
   document.getElementById("onboardingForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    if (password && password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
     const formData = {
       title: document.getElementById("title").value,
       author: document.getElementById("author").value,
       description: document.getElementById("description").value,
+      username: document.getElementById("username").value,
+      password: password,
     };
     try {
       const res = await fetch("/api/onboarding", {

@@ -24,8 +24,8 @@ class SettingsController {
   
   async create(req, res, next) {
     try {
-      const { title, author, description } = req.body;
-      
+      const { title, author, description, username, password } = req.body;
+
       if (!title) {
         return res.status(400).json({
           error: 'Validation Error',
@@ -51,6 +51,8 @@ class SettingsController {
         title,
         author: author || '',
         description: description || '',
+        username: username || '',
+        password_hash: password ? Settings.hashPassword(password) : '',
         auth_token: authToken,
         onboarding_complete: true,
         created_at: existingSettings?.created_at || new Date().toISOString(),
