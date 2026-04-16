@@ -58,6 +58,7 @@
       <% } else { %>
       <div class="settings-grid">
         <div class="box is-fullheight">
+          <h3 class="title is-5">Credentials</h3>
           <form id="settingsForm" method="POST" action="/settings/update">
             <div>
                 <div class="field">
@@ -77,24 +78,25 @@
           </form>
         </div>
 
-        <div class="box">
+        <div class="box is-fullheight">
           <h3 class="title is-5">Credentials</h3>
-          <p class="mb-3">Set a username and password for easier login as human!</p>
           <form id="credentialsForm" method="POST" action="/settings/update-credentials">
-            <div class="field">
-              <label class="label" for="username">Username</label>
-              <input type="text" id="username" name="username" value="<%= settings.username || '' %>" placeholder="Enter username">
-            </div>
-            <div class="field">
-              <label class="label" for="password">New Password</label>
-              <input type="password" id="password" name="password" placeholder="Enter new password">
-              <% if (settings.hasPassword) { %>
-              <p class="help">Leave blank to keep current password</p>
-              <% } %>
-            </div>
-            <div class="field">
-              <label class="label" for="confirmPassword">Confirm Password</label>
-              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+            <div>
+                <div class="field">
+                <label class="label" for="username">Username</label>
+                <input type="text" id="username" name="username" value="<%= settings.username || '' %>" placeholder="Enter username">
+                </div>
+                <div class="field">
+                <label class="label" for="password">New Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter new password">
+                <% if (settings.hasPassword) { %>
+                <p class="help">Leave blank to keep current password</p>
+                <% } %>
+                </div>
+                <div class="field">
+                <label class="label" for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+                </div>
             </div>
             <button type="submit" class="button is-primary is-fullwidth">Save Credentials</button>
           </form>

@@ -727,8 +727,13 @@ main {
     margin-bottom: 1.5rem;
 }
 
+.box h3 {
+    margin: 0 0 1.5rem !important;
+}
+
 .box.is-fullheight {
     display: flex;
+    flex-direction: column;
 }
 
 .box.is-fullheight form {
@@ -756,14 +761,12 @@ main {
     font-family: var(--font-heading);
     font-size: 1.4rem;
     font-weight: 600;
-    margin-bottom: 1rem;
 }
 
 .title.is-5 {
     font-family: var(--font-heading);
     font-size: 1.2rem;
     font-weight: 600;
-    margin-bottom: 0.75rem;
 }
 
 .is-fullwidth {
