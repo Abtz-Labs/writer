@@ -1,45 +1,45 @@
-<div class="columns posts-section">
-  <div class="column is-8">
-    <% if (posts.length === 0) { %>
-      <div class="empty-state">
-        <h2>Welcome to your blog!</h2>
-        <p>No posts yet. Create your first post using the API:</p>
-        <pre><code>curl -X POST /api/posts \
+<div class="container">
+  <div class="posts-section">
+    <div class="posts-grid">
+      <% if (posts.length === 0) { %>
+        <div class="empty-state">
+          <h2>Welcome to your blog!</h2>
+          <p>No posts yet. Create your first post using the API:</p>
+          <pre><code>curl -X POST /api/posts \
   -H "Content-Type: application/json" \
   -H "X-Auth-Token: YOUR_TOKEN" \
   -d '{"title": "Hello World", "body": "My first post content"}'</code></pre>
-        <% if (!settings.onboarding_complete) { %>
-        <p class="hint">Visit <a href="/onboarding">/onboarding</a> to set up your blog.</p>
-        <% } %>
-      </div>
-    <% } else { %>
-      <% posts.forEach(function(post) { %>
-        <article class="post-card" data-tags="<%= post.tags ? post.tags.join(',') : '' %>">
-          <% if (settings.author) { %>
-          <div class="author-row">
-            <span class="author-avatar"><%= settings.author.charAt(0).toUpperCase() %></span>
-            <span class="author-name"><%= settings.author %></span>
-          </div>
+          <% if (!settings.onboarding_complete) { %>
+            <p class="hint">Visit <a href="/onboarding">/onboarding</a> to set up your blog.</p>
           <% } %>
-          <a href="/post/<%= post.slug %>" class="post-title"><%= post.title %></a>
-          <p class="post-excerpt"><%= post.excerpt %></p>
-          <div class="post-meta">
-            <span class="post-date"><%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
-            <span class="separator">·</span>
-            <span class="reading-time"><%= post.reading_time %> min read</span>
-          </div>
-        </article>
-      <% }); %>
-    <% } %>
-  </div>
+        </div>
+      <% } else { %>
+        <% posts.forEach(function(post) { %>
+          <article class="post-card" data-tags="<%= post.tags ? post.tags.join(',') : '' %>">
+            <% if (settings.author) { %>
+              <div class="author-row">
+                <span class="author-avatar"><%= settings.author.charAt(0).toUpperCase() %></span>
+                <span class="author-name"><%= settings.author %></span>
+              </div>
+            <% } %>
+            <a href="/post/<%= post.slug %>" class="post-title"><%= post.title %></a>
+            <p class="post-excerpt"><%= post.excerpt %></p>
+            <div class="post-meta">
+              <span class="post-date"><%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
+              <span class="separator">·</span>
+              <span class="reading-time"><%= post.reading_time %> min read</span>
+            </div>
+          </article>
+        <% }); %>
+      <% } %>
+    </div>
 
-  <div class="column is-4 has-text-right">
-    <div class="sidebar-section">
+    <div class="sidebar">
       <h3 class="sidebar-title">Topics</h3>
       <div class="tag-list">
-        <a href="/" class="tag is-medium<%= !activeTag ? ' is-active' : '' %>" data-filter="">All</a>
+        <a href="/" class="tag<%= !activeTag ? ' is-active' : '' %>" data-filter="">All</a>
         <% tags.forEach(function(tag) { %>
-          <a href="/?tag=<%= encodeURIComponent(tag) %>" class="tag is-medium<%= activeTag === tag ? ' is-active' : '' %>" data-filter="<%= tag %>"><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a>
+          <a href="/?tag=<%= encodeURIComponent(tag) %>" class="tag<%= activeTag === tag ? ' is-active' : '' %>" data-filter="<%= tag %>"><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a>
         <% }); %>
       </div>
     </div>

@@ -1,4 +1,4 @@
-const { getCollection } = require('../config/database');
+const { getCollection, forceSavePost } = require('../config/database');
 const Post = require('../models/post');
 const metadata = require('../services/metadata');
 const imageProcessor = require('../services/imageProcessor');
@@ -104,7 +104,7 @@ class PostController {
         keywords: inferred.keywords,
         meta_description: inferred.meta_description,
         reading_time: inferred.reading_time,
-        status: status || 'unpublished',
+        status: status || 'draft',
         tags: tags || [],
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
@@ -160,12 +160,13 @@ class PostController {
         keywords: body ? metadata.extractKeywords(title || post.title, processedBody) : post.keywords,
         meta_description: body ? metadata.generateMetaDescription(processedBody) : post.meta_description,
         reading_time: body ? metadata.calculateReadingTime(processedBody) : post.reading_time,
-        status: status || post.status || 'unpublished',
+        status: status || post.status || 'draft',
         tags: tags !== undefined ? tags : post.tags,
         updated_at: new Date().toISOString()
       };
       
       await postsCollection.update(updatedPost);
+      forceSavePost(updatedPost);
       
       res.json(Post.fromDB(updatedPost).toApiJSON());
     } catch (err) {

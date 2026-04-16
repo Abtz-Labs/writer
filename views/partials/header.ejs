@@ -1,16 +1,10 @@
-<nav class="navbar is-white" role="navigation" aria-label="main navigation">
-  <div class="container">
-    <div class="navbar-brand">
-      <a class="navbar-item logo" href="/">
-        <%= settings.title %>
-      </a>
-    </div>
-    <div class="navbar-end">
-      <div class="navbar-item">
-        <% if (settings.author) { %>
-          <span class="has-text-grey-light">by <%= settings.author %></span>
-        <% } %>
-      </div>
-    </div>
+<header class="header">
+  <div class="header-inner">
+    <a class="logo" href="/">
+      <%= settings.title %>
+    </a>
+    <% if (settings.author) { %>
+      <span class="header-author">by <%= settings.author %></span>
+    <% } %>
   </div>
-</nav>
+</header>

@@ -1,5 +1,6 @@
 const JSLiteDB = require('jslitedb');
 const path = require('path');
+const fs = require('fs');
 
 const dbPath = path.resolve(__dirname, '..', 'storage', 'data');
 
@@ -24,8 +25,26 @@ function closeDB() {
   }
 }
 
+function saveDB() {
+  if (db) {
+    db.save();
+  }
+}
+
+function forceSavePost(post) {
+  const postsFile = path.join(dbPath, 'posts.json');
+  let data = {};
+  if (fs.existsSync(postsFile)) {
+    data = JSON.parse(fs.readFileSync(postsFile, 'utf8'));
+  }
+  data[post.id] = post;
+  fs.writeFileSync(postsFile, JSON.stringify(data, null, 2));
+}
+
 module.exports = {
   getDB,
   getCollection,
-  closeDB
+  closeDB,
+  saveDB,
+  forceSavePost
 };

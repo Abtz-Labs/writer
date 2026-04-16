@@ -8,21 +8,15 @@
     <form id="onboardingForm" method="POST" action="/api/onboarding">
       <div class="field">
         <label class="label" for="title">What is your blog title?</label>
-        <div class="control">
-          <input class="input" type="text" id="title" name="title" required placeholder="My Awesome Blog">
-        </div>
+        <input type="text" id="title" name="title" required placeholder="My Awesome Blog">
       </div>
       <div class="field">
         <label class="label" for="author">What is your name (the author)?</label>
-        <div class="control">
-          <input class="input" type="text" id="author" name="author" required placeholder="John Doe">
-        </div>
+        <input type="text" id="author" name="author" required placeholder="John Doe">
       </div>
       <div class="field">
         <label class="label" for="description">Write a short description about your blog</label>
-        <div class="control">
-          <textarea class="textarea" id="description" name="description" placeholder="A blog about..."></textarea>
-        </div>
+        <textarea id="description" name="description" placeholder="A blog about..."></textarea>
       </div>
 
       <hr>
@@ -59,7 +53,7 @@
       ⚠️ Save this token! You won't be able to see it again, but you'll be able to rotate it, if needed.
     </p>
     <p>Use this token in the <code>X-Auth-Token</code> header for all protected API operations.</p>
-    <a href="/" class="button is-link is-outlined mt-3">Go to Blog</a>
+    <a href="/" class="button is-link is-outline mt-3">Go to Blog</a>
   </div>
 </section>
 

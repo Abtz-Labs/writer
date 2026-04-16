@@ -12,7 +12,7 @@ class Post {
     this.keywords = data.keywords;
     this.meta_description = data.meta_description;
     this.reading_time = data.reading_time;
-    this.status = data.status || 'unpublished';
+    this.status = data.status || 'draft';
     this.tags = data.tags || [];
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || new Date().toISOString();

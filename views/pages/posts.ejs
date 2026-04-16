@@ -9,9 +9,7 @@
     <form id="loginForm" method="POST" action="/posts/login">
       <div class="field">
         <label class="label" for="token">Auth Token</label>
-        <div class="control">
-          <input class="input" type="password" id="token" name="token" required placeholder="Enter your auth token">
-        </div>
+        <input type="password" id="token" name="token" required placeholder="Enter your auth token">
       </div>
       <button type="submit" class="button is-primary is-fullwidth">Login</button>
     </form>
@@ -36,7 +34,7 @@
           <span class="post-status is-<%= post.status %>"><%= post.status %></span>
           <div class="card-actions mt-2">
             <button class="button is-primary is-small" onclick="editPost('<%= post.slug %>')">Edit</button>
-            <button class="button is-outlined is-danger is-small" onclick="deletePost('<%= post.slug %>')">Delete</button>
+            <button class="button is-outline is-danger is-small" onclick="deletePost('<%= post.slug %>')">Delete</button>
           </div>
         </div>
     <% }); %>
@@ -49,34 +47,22 @@
       <input type="hidden" id="postSlug" name="slug" value="">
       <div class="field">
         <label class="label" for="title">Title</label>
-        <div class="control">
-          <input class="input" type="text" id="title" name="title" required value="">
-        </div>
+        <input type="text" id="title" name="title" required value="">
       </div>
       <div class="field">
         <label class="label" for="description">Description</label>
-        <div class="control">
-          <textarea class="textarea" id="description" name="description"></textarea>
-        </div>
+        <textarea id="description" name="description"></textarea>
       </div>
       <div class="field">
         <label class="label" for="status">Status</label>
-        <div class="control">
-          <div class="select is-fullwidth">
-            <select id="status" name="status">
-              <option value="unpublished">Unpublished</option>
-              <option value="published">Published</option>
-            </select>
-          </div>
-        </div>
+        <select id="status" name="status">
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+        </select>
       </div>
-      <div class="field is-grouped">
-        <div class="control">
-          <button type="button" class="button is-outlined" onclick="cancelEdit()">Cancel</button>
-        </div>
-        <div class="control">
-          <button type="submit" class="button is-primary">Save</button>
-        </div>
+      <div class="field">
+        <button type="button" class="button is-outline" onclick="cancelEdit()">Cancel</button>
+        <button type="submit" class="button is-primary">Save</button>
       </div>
     </form>
   </div>
@@ -103,7 +89,7 @@
     document.getElementById('postSlug').value = slug;
     document.getElementById('title').value = post.title;
     document.getElementById('description').value = post.body || '';
-    document.getElementById('status').value = post.status || 'unpublished';
+    document.getElementById('status').value = post.status || 'draft';
   }
 
   function cancelEdit() {

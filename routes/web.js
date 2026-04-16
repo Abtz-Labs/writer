@@ -197,6 +197,75 @@ router.post('/settings/update-credentials', async (req, res, next) => {
   }
 });
 
+router.get('/panel', async (req, res, next) => {
+  try {
+    const settingsCollection = getCollection('settings');
+    const settingsData = await settingsCollection.find({ id: 'settings' });
+    const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+    
+    if (!settingsObj?.onboarding_complete) {
+      return res.redirect('/onboarding');
+    }
+    
+    const settings = Settings.fromDB(settingsObj).toJSON();
+    const isAuthenticated = req.session.authToken === settingsObj.auth_token;
+    const postsCollection = getCollection('posts');
+    const postsData = await postsCollection.find() || [];
+    const posts = postsData.map(p => {
+      const post = Post.fromDB(p).toJSON();
+      delete post.bodyHtml;
+      return post;
+    });
+    
+    res.render('panel', { posts, isAuthenticated, error: null, token: req.session.authToken || '', settings });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/panel/login', async (req, res, next) => {
+  try {
+    const { token, username, password } = req.body;
+    
+    const settingsCollection = getCollection('settings');
+    const settingsData = await settingsCollection.find({ id: 'settings' });
+    const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+    
+    if (!settingsObj) {
+      return res.redirect('/onboarding');
+    }
+    
+    const settings = Settings.fromDB(settingsObj);
+    let isValid = false;
+    
+    if (token) {
+      isValid = token === settingsObj.auth_token;
+    } else if (username && password) {
+      isValid = settings.username === username && settings.verifyPassword(password);
+    }
+    
+    if (isValid) {
+      req.session.authToken = settingsObj.auth_token;
+      return res.redirect('/panel');
+    }
+    
+    res.render('panel', { 
+      posts: [], 
+      isAuthenticated: false, 
+      error: 'Invalid credentials',
+      token: '',
+      settings: settings.toJSON()
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/panel/logout', (req, res, next) => {
+  req.session = null;
+  res.redirect('/panel');
+});
+
 router.get('/posts', async (req, res, next) => {
   try {
     const settingsCollection = getCollection('settings');

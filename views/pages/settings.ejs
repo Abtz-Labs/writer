@@ -1,130 +1,128 @@
-<section class="form-section">
-  <% if (!isAuthenticated) { %>
-  <div class="has-text-centered mb-5">
-    <h1 class="title">Settings Login</h1>
-    <% if (settings.username && settings.hasPassword) { %>
-    <p class="subtitle">Enter your username and password, or auth token.</p>
-    <% } else { %>
-    <p class="subtitle">Enter your auth token to access settings.</p>
+<div class="panel-layout">
+  <nav class="panel-nav">
+    <div class="panel-nav-inner">
+      <a class="panel-logo" href="/panel">Panel</a>
+      <div class="panel-nav-links">
+        <a href="/panel">Posts</a>
+        <a href="/settings" class="is-active">Settings</a>
+        <form method="POST" action="/panel/logout" style="display: inline;">
+          <button type="submit" class="button-link">Logout</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+  <div class="panel-content">
+    <% if (isAuthenticated) { %>
+    <div class="panel-header">
+      <h1 class="panel-title">Settings</h1>
+      <div class="panel-actions"></div>
+    </div>
     <% } %>
-  </div>
 
-  <% if (error) { %>
-  <div class="notification is-danger is-light mb-4"><%= error %></div>
-  <% } %>
-
-  <div class="box">
-    <form id="loginForm" method="POST" action="/settings/login">
-      <% if (settings.username && settings.hasPassword) { %>
-      <div class="field">
-        <label class="label" for="username">Username</label>
-        <div class="control">
-          <input class="input" type="text" id="username" name="username" placeholder="Enter username">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label" for="password">Password</label>
-        <div class="control">
-          <input class="input" type="password" id="password" name="password" placeholder="Enter password">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label">Or use auth token</label>
-      </div>
-      <% } %>
-      <div class="field">
-        <label class="label" for="token">Auth Token</label>
-        <div class="control">
-          <input class="input" type="password" id="token" name="token" <%= (settings.username && settings.hasPassword) ? '' : 'required' %> placeholder="Enter your auth token">
-        </div>
-      </div>
-      <button type="submit" class="button is-primary is-fullwidth">Login</button>
-    </form>
-  <% } else { %>
-  <div class="has-text-centered mb-5">
-    <h1 class="title">Blog Settings</h1>
-    <p class="subtitle">Manage your blog configuration.</p>
-  </div>
-
-  <div class="box">
-    <form id="settingsForm" method="POST" action="/settings/update">
-      <div class="field">
-        <label class="label" for="title">Blog Title</label>
-        <div class="control">
-          <input class="input" type="text" id="title" name="title" required value="<%= settings.title || '' %>">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label" for="author">Author Name</label>
-        <div class="control">
-          <input class="input" type="text" id="author" name="author" value="<%= settings.author || '' %>">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label" for="description">Blog Description</label>
-        <div class="control">
-          <textarea class="textarea" id="description" name="description"><%= settings.description || '' %></textarea>
-        </div>
-      </div>
-      <button type="submit" class="button is-primary is-fullwidth">Save Settings</button>
-    </form>
-  </div>
-
-  <div class="box mt-4">
-    <h3 class="title is-5">Credentials</h3>
-    <p class="mb-3">Set a username and password for easier login as human!</p>
-    <form id="credentialsForm" method="POST" action="/settings/update-credentials">
-      <div class="field">
-        <label class="label" for="username">Username</label>
-        <div class="control">
-          <input class="input" type="text" id="username" name="username" value="<%= settings.username || '' %>" placeholder="Enter username">
-        </div>
-      </div>
-      <div class="field">
-        <label class="label" for="password">New Password</label>
-        <div class="control">
-          <input class="input" type="password" id="password" name="password" placeholder="Enter new password">
-        </div>
-        <% if (settings.hasPassword) { %>
-        <p class="help">Leave blank to keep current password</p>
+    <section class="form-section">
+      <% if (!isAuthenticated) { %>
+      <div class="has-text-centered mb-5">
+        <h1 class="title">Settings Login</h1>
+        <% if (settings.username && settings.hasPassword) { %>
+        <p class="subtitle">Enter your username and password, or auth token.</p>
+        <% } else { %>
+        <p class="subtitle">Enter your auth token to access settings.</p>
         <% } %>
       </div>
-      <div class="field">
-        <label class="label" for="confirmPassword">Confirm Password</label>
-        <div class="control">
-          <input class="input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+
+      <% if (error) { %>
+      <div class="notification is-danger is-light mb-4"><%= error %></div>
+      <% } %>
+
+      <div class="box">
+        <form id="loginForm" method="POST" action="/settings/login">
+          <% if (settings.username && settings.hasPassword) { %>
+          <div class="field">
+            <label class="label" for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Enter username">
+          </div>
+          <div class="field">
+            <label class="label" for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="Enter password">
+          </div>
+          <div class="field">
+            <label class="label">Or use auth token</label>
+          </div>
+          <% } %>
+          <div class="field">
+            <label class="label" for="token">Auth Token</label>
+            <input type="password" id="token" name="token" <%= (settings.username && settings.hasPassword) ? '' : 'required' %> placeholder="Enter your auth token">
+          </div>
+          <button type="submit" class="button is-primary is-fullwidth">Login</button>
+        </form>
+      <% } else { %>
+      <div class="settings-grid">
+        <div class="box is-fullheight">
+          <form id="settingsForm" method="POST" action="/settings/update">
+            <div>
+                <div class="field">
+                <label class="label" for="title">Blog Title</label>
+                <input type="text" id="title" name="title" required value="<%= settings.title || '' %>">
+                </div>
+                <div class="field">
+                <label class="label" for="author">Author Name</label>
+                <input type="text" id="author" name="author" value="<%= settings.author || '' %>">
+                </div>
+                <div class="field">
+                <label class="label" for="description">Blog Description</label>
+                <textarea id="description" name="description"><%= settings.description || '' %></textarea>
+                </div>
+            </div>
+            <button type="submit" class="button is-primary is-fullwidth">Save Settings</button>
+          </form>
+        </div>
+
+        <div class="box">
+          <h3 class="title is-5">Credentials</h3>
+          <p class="mb-3">Set a username and password for easier login as human!</p>
+          <form id="credentialsForm" method="POST" action="/settings/update-credentials">
+            <div class="field">
+              <label class="label" for="username">Username</label>
+              <input type="text" id="username" name="username" value="<%= settings.username || '' %>" placeholder="Enter username">
+            </div>
+            <div class="field">
+              <label class="label" for="password">New Password</label>
+              <input type="password" id="password" name="password" placeholder="Enter new password">
+              <% if (settings.hasPassword) { %>
+              <p class="help">Leave blank to keep current password</p>
+              <% } %>
+            </div>
+            <div class="field">
+              <label class="label" for="confirmPassword">Confirm Password</label>
+              <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
+            </div>
+            <button type="submit" class="button is-primary is-fullwidth">Save Credentials</button>
+          </form>
+        </div>
+
+        <div class="box">
+          <h3 class="title is-5">Security</h3>
+          <form id="rotateTokenForm" method="POST" action="/settings/rotate-token">
+            <p class="mb-3">
+                Rotate your auth token if you suspect it has been compromised. <br />
+                <strong>Make sure to update any applications using the old token.</strong>
+            </p>
+            <button type="submit" class="button is-outline is-danger" onclick="return confirm('Are you sure you want to rotate your auth token? Any applications using the current token will lose access.');">
+              Rotate Auth Token
+            </button>
+          </form>
         </div>
       </div>
-      <button type="submit" class="button is-primary">Save Credentials</button>
-    </form>
-  </div>
 
-  <div class="box mt-4">
-    <h3 class="title is-5">Security</h3>
-    <form id="rotateTokenForm" method="POST" action="/settings/rotate-token">
-      <p class="mb-3">Rotate your auth token if you suspect it has been compromised. <strong>Make sure to update any applications using the old token.</strong></p>
-      <button type="submit" class="button is-outlined is-danger" onclick="return confirm('Are you sure you want to rotate your auth token? Any applications using the current token will lose access.');">
-        Rotate Auth Token
-      </button>
-    </form>
-  </div>
-
-  <div class="result-box" id="result" style="display: none">
-    <h3>Token Rotated!</h3>
-    <p>Your new auth token:</p>
-    <pre><code id="newTokenDisplay"></code></pre>
-    <p class="token-warning">⚠️ Save this new token! You won't be able to see it again.</p>
-    <a href="/settings" class="button is-link is-outlined mt-3">Back to Settings</a>
-  </div>
-
-  <div class="mt-4">
-    <a href="/posts" class="button is-link is-outlined">Manage Posts</a>
-    <form id="logoutForm" method="POST" action="/settings/logout" style="display: inline;">
-      <button type="submit" class="button is-link is-outlined ml-2">Logout</button>
-    </form>
-  </div>
-  <% } %>
-</section>
+      <div class="result-box" id="result" style="display: none">
+        <h3>Token Rotated!</h3>
+        <p>Your new auth token:</p>
+        <pre><code id="newTokenDisplay"></code></pre>
+        <p class="token-warning">Save this new token! You won't be able to see it again.</p>
+        <a href="/settings" class="button is-link is-outlined mt-3">Back to Settings</a>
+      </div>
+      <% } %>
+    </section>
 
 <% if (isAuthenticated) { %>
 <script>
@@ -164,8 +162,7 @@
       });
       const data = await res.json();
       if (data.auth_token) {
-        document.getElementById("settingsForm").parentElement.style.display = "none";
-        document.getElementById("rotateTokenForm").parentElement.style.display = "none";
+        document.querySelector(".settings-grid").style.display = "none";
         document.getElementById("result").style.display = "block";
         document.getElementById("newTokenDisplay").textContent = data.auth_token;
       } else if (data.error) {

@@ -6,10 +6,9 @@
   <title><%= typeof title !== 'undefined' ? title : (typeof post !== 'undefined' && post ? post.title : (typeof settings !== 'undefined' && settings ? settings.title : 'MiniMedium Blog')) %></title>
   <meta name="description" content="<%= typeof post !== 'undefined' && post ? post.meta_description : (typeof settings !== 'undefined' && settings ? settings.description : '') %>">
   <meta name="keywords" content="<%= typeof post !== 'undefined' && post ? post.keywords : '' %>">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/versions/bulma-no-dark-mode.min.css">
   <link rel="stylesheet" href="/css/style.css">
 </head>
-<body style="background-color: #ffffff; color: #292929;">
+<body>
   <%- include('partials/header') %>
   
   <main class="container">
