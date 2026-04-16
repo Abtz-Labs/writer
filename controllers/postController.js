@@ -165,7 +165,7 @@ class PostController {
         updated_at: new Date().toISOString()
       };
       
-      await postsCollection.update(updatedPost);
+      await postsCollection.update(updatedPost.id, updatedPost);
       forceSavePost(updatedPost);
       
       res.json(Post.fromDB(updatedPost).toApiJSON());

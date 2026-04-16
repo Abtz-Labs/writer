@@ -9,7 +9,7 @@ MiniMedium Blog — a single-tenant, Medium-style blog web application with a RE
 ## Commands
 
 ```bash
-npm start              # Dev server with nodemon hot-reload (default port 3000)
+npm start              # Dev server with nodemon hot-reload (default port 8080)
 node app.js            # Production start
 node app.js -p 4000    # Custom port
 npm test               # Jest tests with coverage
@@ -90,7 +90,7 @@ When a post is created (`POST /api/posts`) or updated:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `PORT` | `3000` | HTTP server port (also settable via `-p` CLI flag) |
+| `PORT` | `8080` | HTTP server port (also settable via `-p` CLI flag) |
 | `SESSION_KEY` | `'default-secret-key-change-in-production'` | Cookie session encryption key |
 | `NODE_ENV` | `'development'` | Environment mode |
 

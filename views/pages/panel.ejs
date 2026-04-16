@@ -1,42 +1,4 @@
-<% if (!isAuthenticated) { %>
-<section class="form-section">
-  <div class="has-text-centered mb-5">
-    <h1 class="title">Admin Panel</h1>
-    <% if (settings.username && settings.hasPassword) { %>
-    <p class="subtitle">Enter your username and password, or auth token.</p>
-    <% } else { %>
-    <p class="subtitle">Enter your auth token to access the admin panel.</p>
-    <% } %>
-  </div>
-
-  <% if (error) { %>
-  <div class="notification is-danger is-light mb-4"><%= error %></div>
-  <% } %>
-
-  <div class="box">
-    <form id="loginForm" method="POST" action="/panel/login">
-      <% if (settings.username && settings.hasPassword) { %>
-      <div class="field">
-        <label class="label" for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter username">
-      </div>
-      <div class="field">
-        <label class="label" for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter password">
-      </div>
-      <div class="field">
-        <label class="label">Or use auth token</label>
-      </div>
-      <% } %>
-      <div class="field">
-        <label class="label" for="token">Auth Token</label>
-        <input type="password" id="token" name="token" <%= (settings.username && settings.hasPassword) ? '' : 'required' %> placeholder="Enter your auth token">
-      </div>
-      <button type="submit" class="button is-primary is-fullwidth">Login</button>
-    </form>
-  </div>
-</section>
-<% } else { %>
+<% if (isAuthenticated) { %>
 <div class="panel-layout">
   <nav class="panel-nav">
     <div class="panel-nav-inner">
@@ -44,7 +6,8 @@
       <div class="panel-nav-links">
         <a href="/panel" class="is-active">Posts</a>
         <a href="/settings">Settings</a>
-        <form method="POST" action="/panel/logout" style="display: inline;">
+        <span> | </span>
+        <form method="POST" action="/logout" style="display: inline;">
           <button type="submit" class="button-link">Logout</button>
         </form>
       </div>
@@ -78,7 +41,7 @@
             <% posts.forEach(function(post) { %>
               <tr>
                 <td class="post-title-cell">
-                  <a href="/post/<%= post.slug %>" target="_blank"><%= post.title %></a>
+                  <a onclick="editPost('<%= post.slug %>')"><%= post.title %></a>
                 </td>
                 <td>
                   <span class="post-status is-<%= post.status %>"><%= post.status %></span>
@@ -87,7 +50,7 @@
                   <%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
                 </td>
                 <td class="actions-cell">
-                  <a href="/post/<%= post.slug %>" target="_blank" class="btn-view">View</a>
+                  <a href="/post/<%= post.slug %>" class="btn-view">View</a>
                   <button class="btn-edit" onclick="editPost('<%= post.slug %>')">Edit</button>
                   <button class="btn-delete" onclick="deletePost('<%= post.slug %>')">Delete</button>
                 </td>
@@ -95,7 +58,20 @@
             <% }); %>
           </tbody>
         </table>
-      <% } %>
+<% } %>
+      </div>
+
+    <% if (totalPages > 1) { %>
+      <nav class="pagination">
+        <% if (prevPage) { %>
+          <a href="?page=<%= prevPage %>" class="pagination-link">&larr; prev</a>
+        <% } %>
+        <span class="pagination-info"><%= currentPage %> / <%= totalPages %></span>
+        <% if (nextPage) { %>
+          <a href="?page=<%= nextPage %>" class="pagination-link">next &rarr;</a>
+        <% } %>
+      </nav>
+    <% } %>
     </div>
 
     <div id="editForm" class="edit-form" style="display: none">
@@ -111,7 +87,21 @@
         </div>
         <div class="field">
           <label class="label" for="body">Content</label>
-          <textarea id="body" name="body"></textarea>
+          <div class="markdown-editor">
+            <div class="markdown-toolbar">
+              <button type="button" onclick="insertMarkdown('**', '**')" title="Bold"><b>B</b></button>
+              <button type="button" onclick="insertMarkdown('*', '*')" title="Italic"><i>I</i></button>
+              <button type="button" onclick="insertMarkdown('# ', '')" title="Heading">H</button>
+              <button type="button" onclick="insertMarkdown('[', '](url)')" title="Link">Link</button>
+              <button type="button" onclick="insertImage()" title="Image">Img</button>
+              <button type="button" onclick="insertMarkdown('`', '`')" title="Code">Code</button>
+              <button type="button" onclick="insertMarkdown('```\n', '\n```')" title="Code Block">```</button>
+              <button type="button" onclick="insertMarkdown('- ', '')" title="List">List</button>
+              <button type="button" onclick="insertTable()" title="Table">Table</button>
+              <button type="button" onclick="insertMarkdown('> ', '')" title="Quote">Quote</button>
+            </div>
+            <textarea id="body" name="body"></textarea>
+          </div>
         </div>
         <div class="field">
           <label class="label" for="status">Status</label>
@@ -168,6 +158,31 @@ document.getElementById('postForm').action = '/api/posts/' + slug;
 function cancelEdit() {
   document.querySelector('.post-list').style.display = 'block';
   document.getElementById('editForm').style.display = 'none';
+}
+
+function insertMarkdown(before, after) {
+  const textarea = document.getElementById('body');
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
+  const text = textarea.value;
+  const selected = text.substring(start, end);
+  const replacement = selected ? before + selected + after : before + after;
+  textarea.value = text.substring(0, start) + replacement + text.substring(end);
+  textarea.focus();
+  const cursorPos = selected ? start + replacement.length : start + before.length;
+  textarea.setSelectionRange(cursorPos, cursorPos);
+}
+
+function insertImage() {
+  const url = prompt('Enter image URL:', 'https://');
+  if (!url) return;
+  const alt = prompt('Enter alt text:', 'image description');
+  insertMarkdown('![', alt ? `${alt}](${url})` : `](${url})`);
+}
+
+function insertTable() {
+  const insert = '\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n';
+  insertMarkdown(insert, '');
 }
 
 function deletePost(slug) {

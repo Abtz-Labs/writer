@@ -4,7 +4,7 @@
   "description": "A simple, Medium-style blog webapp with RESTful API",
   "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
+    "start": "nodemon app.js -p 8080",
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },

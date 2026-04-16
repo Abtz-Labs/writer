@@ -16,12 +16,6 @@
       <% } else { %>
         <% posts.forEach(function(post) { %>
           <article class="post-card" data-tags="<%= post.tags ? post.tags.join(',') : '' %>">
-            <% if (settings.author) { %>
-              <div class="author-row">
-                <span class="author-avatar"><%= settings.author.charAt(0).toUpperCase() %></span>
-                <span class="author-name"><%= settings.author %></span>
-              </div>
-            <% } %>
             <a href="/post/<%= post.slug %>" class="post-title"><%= post.title %></a>
             <p class="post-excerpt"><%= post.excerpt %></p>
             <div class="post-meta">
@@ -31,6 +25,18 @@
             </div>
           </article>
         <% }); %>
+
+        <% if (totalPages > 1) { %>
+        <nav class="pagination">
+          <% if (prevPage) { %>
+            <a href="?page=<%= prevPage %><%= activeTag ? '&tag=' + activeTag : '' %>" class="pagination-link">&larr; prev</a>
+          <% } %>
+          <span class="pagination-info"><%= currentPage %> / <%= totalPages %></span>
+          <% if (nextPage) { %>
+            <a href="?page=<%= nextPage %><%= activeTag ? '&tag=' + activeTag : '' %>" class="pagination-link">next &rarr;</a>
+          <% } %>
+        </nav>
+        <% } %>
       <% } %>
     </div>
 

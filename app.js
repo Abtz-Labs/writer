@@ -48,10 +48,10 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 const args = process.argv.slice(2);
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 8080;
 const portIndex = args.indexOf('-p');
 if (portIndex !== -1 && args[portIndex + 1]) {
-  PORT = parseInt(args[portIndex + 1], 10) || 3000;
+  PORT = parseInt(args[portIndex + 1], 10) || 8080;
 }
 
 app.listen(PORT, () => {

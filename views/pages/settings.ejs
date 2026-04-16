@@ -5,57 +5,19 @@
       <div class="panel-nav-links">
         <a href="/panel">Posts</a>
         <a href="/settings" class="is-active">Settings</a>
-        <form method="POST" action="/panel/logout" style="display: inline;">
+        <form method="POST" action="/logout" style="display: inline;">
           <button type="submit" class="button-link">Logout</button>
         </form>
       </div>
     </div>
   </nav>
   <div class="panel-content">
-    <% if (isAuthenticated) { %>
     <div class="panel-header">
       <h1 class="panel-title">Settings</h1>
       <div class="panel-actions"></div>
     </div>
-    <% } %>
 
     <section class="form-section">
-      <% if (!isAuthenticated) { %>
-      <div class="has-text-centered mb-5">
-        <h1 class="title">Settings Login</h1>
-        <% if (settings.username && settings.hasPassword) { %>
-        <p class="subtitle">Enter your username and password, or auth token.</p>
-        <% } else { %>
-        <p class="subtitle">Enter your auth token to access settings.</p>
-        <% } %>
-      </div>
-
-      <% if (error) { %>
-      <div class="notification is-danger is-light mb-4"><%= error %></div>
-      <% } %>
-
-      <div class="box">
-        <form id="loginForm" method="POST" action="/settings/login">
-          <% if (settings.username && settings.hasPassword) { %>
-          <div class="field">
-            <label class="label" for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Enter username">
-          </div>
-          <div class="field">
-            <label class="label" for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="Enter password">
-          </div>
-          <div class="field">
-            <label class="label">Or use auth token</label>
-          </div>
-          <% } %>
-          <div class="field">
-            <label class="label" for="token">Auth Token</label>
-            <input type="password" id="token" name="token" <%= (settings.username && settings.hasPassword) ? '' : 'required' %> placeholder="Enter your auth token">
-          </div>
-          <button type="submit" class="button is-primary is-fullwidth">Login</button>
-        </form>
-      <% } else { %>
       <div class="settings-grid">
         <div class="box is-fullheight">
           <h3 class="title is-5">Credentials</h3>
@@ -123,11 +85,8 @@
         <p class="token-warning">Save this new token! You won't be able to see it again.</p>
         <a href="/settings" class="button is-link is-outlined mt-3">Back to Settings</a>
       </div>
-      <% } %>
-    </section>
-
-<% if (isAuthenticated) { %>
-<script>
+      
+  <script>
   document.getElementById("settingsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = {
@@ -209,4 +168,3 @@
     }
   });
 </script>
-<% } %>

@@ -1,0 +1,33 @@
+<div class="has-text-centered mb-5">
+  <h1 class="title"><%= title %></h1>
+  <% if (subtitle) { %>
+  <p class="subtitle"><%= subtitle %></p>
+  <% } %>
+</div>
+
+<% if (error) { %>
+<div class="notification is-danger is-light mb-4"><%= error %></div>
+<% } %>
+
+<div class="box">
+  <form id="loginForm" method="POST" action="<%= action %>">
+    <% if (showUsername) { %>
+    <div class="field">
+      <label class="label" for="username">Username</label>
+      <input type="text" id="username" name="username" placeholder="Enter username">
+    </div>
+    <div class="field">
+      <label class="label" for="password">Password</label>
+      <input type="password" id="password" name="password" placeholder="Enter password">
+    </div>
+    <div class="field">
+      <label class="label">Or use auth token</label>
+    </div>
+    <% } %>
+    <div class="field">
+      <label class="label" for="token">Auth Token</label>
+      <input type="password" id="token" name="token" <%= tokenRequired ? 'required' : '' %> placeholder="Enter your auth token">
+    </div>
+    <button type="submit" class="button is-primary is-fullwidth">Login</button>
+  </form>
+</div>
