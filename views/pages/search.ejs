@@ -1,16 +1,21 @@
 <div class="container">
   <div class="posts-section">
     <div class="posts-grid">
+      <% if (query) { %>
+        <div class="search-header">
+          <h2 class="search-title">Search results for "<%= query %>"</h2>
+          <span class="search-count"><%= posts.length %> result<%= posts.length !== 1 ? 's' : '' %></span>
+        </div>
+      <% } %>
+
       <% if (posts.length === 0) { %>
         <div class="empty-state">
-          <h2>Welcome to your blog!</h2>
-          <p>No posts yet. Create your first post using the API:</p>
-          <pre><code>curl -X POST /api/posts \
-  -H "Content-Type: application/json" \
-  -H "X-Auth-Token: YOUR_TOKEN" \
-  -d '{"title": "Hello World", "body": "My first post content"}'</code></pre>
-          <% if (!settings.onboarding_complete) { %>
-            <p class="hint">Visit <a href="/onboarding">/onboarding</a> to set up your blog.</p>
+          <% if (query) { %>
+            <h2>No posts found</h2>
+            <p>No posts match your search for "<%= query %>". Try different keywords.</p>
+          <% } else { %>
+            <h2>Search</h2>
+            <p>Enter a search term to find posts.</p>
           <% } %>
         </div>
       <% } else { %>
@@ -29,11 +34,11 @@
         <% if (totalPages > 1) { %>
         <nav class="pagination">
           <% if (prevPage) { %>
-            <a href="?page=<%= prevPage %><%= activeTag ? '&tag=' + activeTag : '' %>" class="pagination-link">&larr; prev</a>
+            <a href="?q=<%= encodeURIComponent(query) %>&page=<%= prevPage %>" class="pagination-link">&larr; prev</a>
           <% } %>
           <span class="pagination-info"><%= currentPage %> / <%= totalPages %></span>
           <% if (nextPage) { %>
-            <a href="?page=<%= nextPage %><%= activeTag ? '&tag=' + activeTag : '' %>" class="pagination-link">next &rarr;</a>
+            <a href="?q=<%= encodeURIComponent(query) %>&page=<%= nextPage %>" class="pagination-link">next &rarr;</a>
           <% } %>
         </nav>
         <% } %>
@@ -44,7 +49,7 @@
       <div class="search-box">
         <h3 class="sidebar-title">Search</h3>
         <form action="/search" method="GET" class="search-form">
-          <input type="text" name="q" value="<%= typeof query !== 'undefined' ? query : '' %>" placeholder="Search posts..." class="search-input" autocomplete="off">
+          <input type="text" name="q" value="<%= query %>" placeholder="Search posts..." class="search-input" autocomplete="off">
           <button type="submit" class="search-button" aria-label="Search">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </button>
@@ -53,9 +58,9 @@
 
       <h3 class="sidebar-title">Topics</h3>
       <div class="tag-list">
-        <a href="/" class="tag<%= !activeTag ? ' is-active' : '' %>" data-filter="">All</a>
+        <a href="/" class="tag" data-filter="">All</a>
         <% tags.forEach(function(tag) { %>
-          <a href="/?tag=<%= encodeURIComponent(tag) %>" class="tag<%= activeTag === tag ? ' is-active' : '' %>" data-filter="<%= tag %>"><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a>
+          <a href="/?tag=<%= encodeURIComponent(tag) %>" class="tag" data-filter="<%= tag %>"><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a>
         <% }); %>
       </div>
     </div>
@@ -64,25 +69,11 @@
 
 <script>
 (function() {
-  var params = new URLSearchParams(window.location.search);
-  var activeTag = params.get('tag') || '';
-
   document.querySelectorAll('.tag-list .tag').forEach(function(tagEl) {
     tagEl.addEventListener('click', function(e) {
-      if (this.dataset.filter !== activeTag) {
-        window.location.href = this.href;
-      }
+      window.location.href = this.href;
       e.preventDefault();
     });
-  });
-
-  document.querySelectorAll('.post-card').forEach(function(card) {
-    var cardTags = card.dataset.tags ? card.dataset.tags.split(',') : [];
-    if (!activeTag || cardTags.includes(activeTag)) {
-      card.style.display = '';
-    } else {
-      card.style.display = 'none';
-    }
   });
 })();
 </script>

@@ -12,6 +12,51 @@ async function getSettings() {
   return settingsObj ? Settings.fromDB(settingsObj).toJSON() : { title: 'Serif Blog' };
 }
 
+function fuzzyScore(query, text) {
+  if (!query || !text) return 0;
+  const q = query.toLowerCase().trim();
+  const t = text.toLowerCase().trim();
+  if (q === t) return 1000;
+  if (t.includes(q)) return 500 + q.length;
+
+  let score = 0;
+  let tIdx = 0;
+  let consecutive = 0;
+  for (let i = 0; i < q.length; i++) {
+    const ch = q[i];
+    let found = false;
+    while (tIdx < t.length) {
+      if (t[tIdx] === ch) {
+        found = true;
+        score += 1 + consecutive;
+        consecutive++;
+        tIdx++;
+        break;
+      }
+      consecutive = 0;
+      tIdx++;
+    }
+    if (!found) return 0;
+  }
+  return score;
+}
+
+function searchPosts(posts, query) {
+  if (!query || !query.trim()) return [];
+  const q = query.trim();
+  const results = posts.map(post => {
+    const titleScore = fuzzyScore(q, post.title) * 10;
+    const excerptScore = fuzzyScore(q, post.excerpt) * 4;
+    const bodyScore = fuzzyScore(q, post.body) * 1;
+    const slugScore = fuzzyScore(q, post.slug) * 6;
+    const tagsScore = post.tags && Array.isArray(post.tags) ? fuzzyScore(q, post.tags.join(' ')) * 8 : 0;
+    const keywordsScore = post.keywords && Array.isArray(post.keywords) ? fuzzyScore(q, post.keywords.join(' ')) * 7 : 0;
+    const totalScore = titleScore + excerptScore + bodyScore + slugScore + tagsScore + keywordsScore;
+    return { post, score: totalScore };
+  }).filter(r => r.score > 0).sort((a, b) => b.score - a.score).map(r => r.post);
+  return results;
+}
+
 router.get('/', async (req, res, next) => {
   try {
     const { tag, page } = req.query;
@@ -50,6 +95,49 @@ router.get('/', async (req, res, next) => {
       settings, 
       tags, 
       activeTag: tag || null,
+      currentPage: pageNum,
+      totalPages,
+      prevPage: pageNum > 1 ? pageNum - 1 : null,
+      nextPage: pageNum < totalPages ? pageNum + 1 : null
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/search', async (req, res, next) => {
+  try {
+    const { q, page } = req.query;
+    const pageNum = Math.max(1, parseInt(page) || 1);
+    const limit = 10;
+    const skip = (pageNum - 1) * limit;
+
+    const postsCollection = getCollection('posts');
+    const postsData = await postsCollection.find();
+    const allPosts = (postsData || []).map(p => Post.fromDB(p).toView());
+
+    const publishedPosts = allPosts.filter(p => p.status === 'published');
+
+    const allTags = new Set();
+    publishedPosts.forEach(post => {
+      if (post.tags && Array.isArray(post.tags)) {
+        post.tags.forEach(t => allTags.add(t));
+      }
+    });
+    const tags = Array.from(allTags).sort();
+
+    const results = searchPosts(publishedPosts, q);
+
+    const totalPosts = results.length;
+    const totalPages = Math.ceil(totalPosts / limit);
+    const posts = results.slice(skip, skip + limit);
+
+    const settings = await getSettings();
+    res.render('search', {
+      posts,
+      settings,
+      tags,
+      query: q || '',
       currentPage: pageNum,
       totalPages,
       prevPage: pageNum > 1 ? pageNum - 1 : null,
