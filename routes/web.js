@@ -9,7 +9,7 @@ async function getSettings() {
   const settingsCollection = getCollection('settings');
   const settingsData = await settingsCollection.find({ id: 'settings' });
   const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
-  return settingsObj ? Settings.fromDB(settingsObj).toJSON() : { title: 'MiniMedium Blog' };
+  return settingsObj ? Settings.fromDB(settingsObj).toJSON() : { title: 'Serif Blog' };
 }
 
 router.get('/', async (req, res, next) => {
@@ -111,7 +111,7 @@ router.get('/login', async (req, res, next) => {
     }
     
     res.render('login', { 
-      title: settingsObj.title || 'MiniMedium Blog',
+      title: settingsObj.title || 'Serif Blog',
       subtitle: 'Enter your credentials to continue',
       action: '/login',
       showUsername: !!settingsObj.username,
@@ -153,7 +153,7 @@ router.post('/login', async (req, res, next) => {
     }
     
     res.render('login', {
-      title: settingsObj.title || 'MiniMedium Blog',
+      title: settingsObj.title || 'Serif Blog',
       subtitle: 'Enter your credentials to continue',
       action: '/login',
       showUsername: !!settingsObj.username,

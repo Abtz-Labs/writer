@@ -8,7 +8,7 @@ function getApiDocs(req, res) {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
   
   const docs = {
-    name: 'MiniMedium Blog API',
+    name: 'Serif Blog API',
     version: '1.0.0',
     description: 'Self-discoverable RESTful API for blog management',
     

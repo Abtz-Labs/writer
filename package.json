@@ -1,5 +1,5 @@
 {
-  "name": "minimedium-blog",
+  "name": "serif-blog",
   "version": "1.0.0",
   "description": "A simple, Medium-style blog webapp with RESTful API",
   "main": "app.js",
@@ -13,7 +13,7 @@
     "express",
     "ejs",
     "jslitedb",
-    "medium-clone"
+    "serif"
   ],
   "author": "",
   "license": "MIT",

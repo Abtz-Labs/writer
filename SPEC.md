@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-- **Project Name**: MiniMedium Blog
+- **Project Name**: Serif Blog
 - **Type**: Single-tenant blog web application
 - **Core Functionality**: A clean, Medium-style blog platform with RESTful API, Markdown support, and automatic content metadata inference
 - **Target Users**: Bloggers who want a simple, elegant writing experience with an AI-consumable API

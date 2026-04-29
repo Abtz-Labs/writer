@@ -5,7 +5,7 @@ describe('API Basic Tests', () => {
   test('GET /api returns docs', async () => {
     const res = await request(app).get('/api');
     expect(res.status).toBe(200);
-    expect(res.body.name).toBe('MiniMedium Blog API');
+    expect(res.body.name).toBe('Serif Blog API');
   });
   
   test('GET /api/posts returns array', async () => {

@@ -23,7 +23,7 @@ app.use((req, res, next) => {
         return;
       }
       renderData.body = content;
-      renderData.title = renderData.title || data?.post?.title || data?.settings?.title || 'MiniMedium Blog';
+      renderData.title = renderData.title || data?.post?.title || data?.settings?.title || 'Serif Blog';
       originalRender('layout', renderData, callback);
     });
   };
@@ -55,7 +55,7 @@ if (portIndex !== -1 && args[portIndex + 1]) {
 }
 
 app.listen(PORT, () => {
-  console.log(`MiniMedium Blog running at http://localhost:${PORT}`);
+  console.log(`Serif Blog running at http://localhost:${PORT}`);
   console.log(`API docs: http://localhost:${PORT}/api`);
 });
 
