@@ -998,6 +998,57 @@ main {
     gap: var(--spacing-sm);
 }
 
+.panel-search-form {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.panel-search-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.95rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+}
+
+.panel-search-input:focus {
+    outline: none;
+    border-color: var(--color-text-light);
+}
+
+.panel-search-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: var(--color-text);
+    color: var(--color-bg);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: opacity 0.15s;
+}
+
+.panel-search-button:hover {
+    opacity: 0.85;
+}
+
+.panel-search-clear {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    transition: color 0.15s;
+}
+
+.panel-search-clear:hover {
+    color: var(--color-text);
+}
+
 
 /* ============================================
    Post Management (Mobile Default)

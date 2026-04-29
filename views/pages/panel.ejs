@@ -22,10 +22,29 @@
       </div>
     </div>
 
+    <form class="panel-search-form" action="/panel" method="GET">
+      <input
+        type="text"
+        name="q"
+        class="panel-search-input"
+        placeholder="Search posts..."
+        value="<%= query %>"
+        autocomplete="off"
+      >
+      <button type="submit" class="panel-search-button">Search</button>
+      <% if (query) { %>
+        <a href="/panel" class="panel-search-clear">Clear</a>
+      <% } %>
+    </form>
+
     <div class="post-list">
       <% if (posts.length === 0) { %>
         <div class="empty-list">
-          <p>No posts yet. Create your first post to get started.</p>
+          <% if (query) { %>
+            <p>No posts match your search.</p>
+          <% } else { %>
+            <p>No posts yet. Create your first post to get started.</p>
+          <% } %>
         </div>
       <% } else { %>
         <table class="posts-table">
@@ -64,11 +83,11 @@
     <% if (totalPages > 1) { %>
       <nav class="pagination">
         <% if (prevPage) { %>
-          <a href="?page=<%= prevPage %>" class="pagination-link">&larr; prev</a>
+          <a href="?page=<%= prevPage %><%= query ? '&q=' + encodeURIComponent(query) : '' %>" class="pagination-link">&larr; prev</a>
         <% } %>
         <span class="pagination-info"><%= currentPage %> / <%= totalPages %></span>
         <% if (nextPage) { %>
-          <a href="?page=<%= nextPage %>" class="pagination-link">next &rarr;</a>
+          <a href="?page=<%= nextPage %><%= query ? '&q=' + encodeURIComponent(query) : '' %>" class="pagination-link">next &rarr;</a>
         <% } %>
       </nav>
     <% } %>

@@ -350,11 +350,11 @@ router.post('/settings/update-credentials', requireWebAuth, async (req, res, nex
 
 router.get('/panel', requireWebAuth, async (req, res, next) => {
   try {
-    const { page } = req.query;
+    const { page, q } = req.query;
     const pageNum = Math.max(1, parseInt(page) || 1);
     const limit = 15;
     const skip = (pageNum - 1) * limit;
-    
+
     const settings = Settings.fromDB(req.settings).toJSON();
     const postsCollection = getCollection('posts');
     const postsData = await postsCollection.find() || [];
@@ -363,21 +363,27 @@ router.get('/panel', requireWebAuth, async (req, res, next) => {
       delete post.bodyHtml;
       return post;
     });
-    
-    const totalPosts = allPosts.length;
+
+    let filteredPosts = allPosts;
+    if (q && q.trim()) {
+      filteredPosts = searchPosts(allPosts, q);
+    }
+
+    const totalPosts = filteredPosts.length;
     const totalPages = Math.ceil(totalPosts / limit);
-    const posts = allPosts.slice(skip, skip + limit);
-    
-    res.render('panel', { 
-      posts, 
-      error: null, 
-      settings, 
-      token: req.session.authToken, 
+    const posts = filteredPosts.slice(skip, skip + limit);
+
+    res.render('panel', {
+      posts,
+      error: null,
+      settings,
+      token: req.session.authToken,
       isAuthenticated: true,
       currentPage: pageNum,
       totalPages,
       prevPage: pageNum > 1 ? pageNum - 1 : null,
-      nextPage: pageNum < totalPages ? pageNum + 1 : null
+      nextPage: pageNum < totalPages ? pageNum + 1 : null,
+      query: q || ''
     });
   } catch (err) {
     next(err);
