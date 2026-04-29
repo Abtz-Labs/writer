@@ -1,3 +1,6 @@
 storage/data
 node_modules/
 coverage/
+.env
+*.log
+logs/

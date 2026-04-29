@@ -4,11 +4,47 @@ const metadata = require('../services/metadata');
 const imageProcessor = require('../services/imageProcessor');
 const { marked } = require('marked');
 const path = require('path');
+const logger = require('../utils/logger');
 
 marked.setOptions({
   breaks: true,
   gfm: true
 });
+
+function validatePostInput(data, isUpdate = false) {
+  const { title, body, tags, status } = data;
+  const errors = [];
+
+  if (!isUpdate || title !== undefined) {
+    if (!isUpdate && (!title || typeof title !== 'string' || title.trim().length === 0)) {
+      errors.push('Title is required and must be a non-empty string');
+    }
+    if (title && title.length > 200) {
+      errors.push('Title must not exceed 200 characters');
+    }
+  }
+
+  if (!isUpdate || body !== undefined) {
+    if (!isUpdate && (!body || typeof body !== 'string' || body.trim().length === 0)) {
+      errors.push('Body is required and must be a non-empty string');
+    }
+    if (body && body.length > 50000) {
+      errors.push('Body must not exceed 50000 characters');
+    }
+  }
+
+  if (tags !== undefined) {
+    if (!Array.isArray(tags) || !tags.every(t => typeof t === 'string' && t.length <= 50)) {
+      errors.push('Tags must be an array of strings, each not exceeding 50 characters');
+    }
+  }
+
+  if (status !== undefined && !['draft', 'published'].includes(status)) {
+    errors.push('Status must be either "draft" or "published"');
+  }
+
+  return errors;
+}
 
 class PostController {
   async getAll(req, res, next) {
@@ -62,11 +98,12 @@ class PostController {
   async create(req, res, next) {
     try {
       const { title, body, tags, cover_image, status } = req.body;
-      
-      if (!title || !body) {
+
+      const validationErrors = validatePostInput(req.body);
+      if (validationErrors.length > 0) {
         return res.status(400).json({
           error: 'Validation Error',
-          message: 'Title and body are required'
+          message: validationErrors.join('; ')
         });
       }
       
@@ -83,11 +120,11 @@ class PostController {
           try {
             processedCoverImage = await imageProcessor.downloadImage(cover_image, uploadDir);
           } catch (imgErr) {
-            console.warn('Cover image download failed:', imgErr.message);
+            logger.warn('Cover image download failed:', imgErr.message);
           }
         }
       } catch (imgErr) {
-        console.warn('Image processing failed:', imgErr.message);
+        logger.warn('Image processing failed:', imgErr.message);
       }
       
       const allPosts = await postsCollection.find() || [];
@@ -133,16 +170,24 @@ class PostController {
       }
       
       const { title, body, tags, status } = req.body;
-      
+
+      const validationErrors = validatePostInput(req.body, true);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({
+          error: 'Validation Error',
+          message: validationErrors.join('; ')
+        });
+      }
+
       let processedBody = body || post.body;
       let newSlug = post.slug;
-      
+
       if (body) {
         const uploadDir = path.join(__dirname, '../../public/uploads');
         try {
           processedBody = await imageProcessor.processImages(body, uploadDir);
         } catch (imgErr) {
-          console.warn('Image processing failed:', imgErr.message);
+          logger.warn('Image processing failed:', imgErr.message);
         }
         
         if (title && title !== post.title) {

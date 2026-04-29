@@ -124,6 +124,10 @@ function getApiDocs(req, res) {
   res.json(docs);
 }
 
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 router.get('/', getApiDocs);
 
 router.get('/posts', postController.getAll);

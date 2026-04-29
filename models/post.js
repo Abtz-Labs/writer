@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const { marked } = require('marked');
+const xss = require('xss');
 
 class Post {
   constructor(data) {
@@ -48,7 +49,7 @@ class Post {
     const json = this.toJSON();
     return {
       ...json,
-      bodyHtml: marked.parse(this.body, { breaks: true, gfm: true })
+      bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true }))
     };
   }
 
@@ -56,7 +57,7 @@ class Post {
     const json = this.toJSON();
     return {
       ...json,
-      bodyHtml: marked.parse(this.body, { breaks: true, gfm: true }),
+      bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true })),
       isPublished: this.status === 'published'
     };
   }

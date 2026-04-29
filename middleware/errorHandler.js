@@ -1,6 +1,8 @@
+const logger = require('../utils/logger');
+
 function errorHandler(err, req, res, next) {
-  console.error('Error:', err.message);
-  console.error('Stack:', err.stack);
+  logger.error('Error:', err.message);
+  logger.error('Stack:', err.stack);
   
   if (err.name === 'ValidationError') {
     return res.status(400).json({
