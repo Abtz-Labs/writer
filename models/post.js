@@ -69,8 +69,28 @@ class Post {
 
   toView() {
     const json = this.toJSON();
+
+    // Regenerate a clean plain-text excerpt from the body so that
+    // any markdown tags missed when the post was originally saved
+    // are stripped at display time.
+    let cleanExcerpt = '';
+    if (this.body) {
+      const plain = this.body
+        .replace(/!\[.*?\]\(.*?\)/g, '')
+        .replace(/\[.*?\]\(.*?\)/g, '')
+        .replace(/~~[\s\S]+?~~/g, '')
+        .replace(/~[\s\S]+?~/g, '')
+        .replace(/[#*_`~]/g, '')
+        .replace(/\n+/g, ' ')
+        .trim();
+      cleanExcerpt = plain.length <= 200
+        ? plain
+        : plain.substring(0, 197).trim() + '...';
+    }
+
     return {
       ...json,
+      excerpt: cleanExcerpt,
       bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true })),
       isPublished: this.status === 'published',
       firstImage: Post.extractFirstImage(this.body, this.cover_image)

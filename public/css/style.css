@@ -3,12 +3,17 @@
    ============================================ */
 
 :root {
-    --font-heading: "Charter", "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
-    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-    --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --font-heading:
+        "Charter", "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+    --font-body:
+        -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+        sans-serif;
+    --font-mono:
+        "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
 
     --color-text: #292929;
     --color-text-light: #757575;
+    --color-text-red: #be374c;
     --color-border: #eaeaea;
     --color-accent: #1a8917;
     --color-bg: #ffffff;
@@ -22,7 +27,9 @@
     --spacing-2xl: 3rem;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -49,7 +56,6 @@ a {
     text-decoration: none;
 }
 
-
 /* ============================================
    Layout & Container (Mobile Default)
    ============================================ */
@@ -66,7 +72,6 @@ main {
     min-height: 100vh;
     padding: var(--spacing-lg) 0;
 }
-
 
 /* ============================================
    Header (Mobile Default)
@@ -104,7 +109,6 @@ main {
     color: var(--color-text-light);
 }
 
-
 /* ============================================
    Footer (Mobile Default)
    ============================================ */
@@ -126,7 +130,6 @@ main {
     color: var(--color-text);
 }
 
-
 /* ============================================
    Posts List - Layout (Mobile Default)
    ============================================ */
@@ -146,7 +149,6 @@ main {
     max-width: 100%;
     order: 2;
 }
-
 
 /* ============================================
    Sidebar (Mobile Default)
@@ -184,7 +186,9 @@ main {
     border-radius: 999px;
     overflow: hidden;
     background: var(--color-bg);
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
 }
 
 .search-form:focus-within {
@@ -251,7 +255,6 @@ main {
     max-width: 100%;
 }
 
-
 /* ============================================
    Tags (Mobile Default)
    ============================================ */
@@ -272,7 +275,6 @@ main {
     color: var(--color-bg);
     border-color: var(--color-text);
 }
-
 
 /* ============================================
    Post Card (Mobile Default)
@@ -375,7 +377,6 @@ main {
     margin: 0 0.4rem;
 }
 
-
 /* ============================================
    Empty State (Mobile Default)
    ============================================ */
@@ -412,7 +413,6 @@ main {
     font-size: 0.9rem;
     color: var(--color-text-light);
 }
-
 
 /* ============================================
    Post Detail (Mobile Default)
@@ -498,7 +498,6 @@ main {
     padding: 0.2rem 0.6rem;
 }
 
-
 /* ============================================
    Post Content Typography (Mobile Default)
    ============================================ */
@@ -518,9 +517,15 @@ main {
     line-height: 1.3;
 }
 
-.content h1 { font-size: 1.8rem; }
-.content h2 { font-size: 1.5rem; }
-.content h3 { font-size: 1.25rem; }
+.content h1 {
+    font-size: 1.8rem;
+}
+.content h2 {
+    font-size: 1.5rem;
+}
+.content h3 {
+    font-size: 1.25rem;
+}
 
 .content p {
     margin-bottom: 1.25rem;
@@ -570,6 +575,7 @@ main {
     padding: 0.12rem 0.35rem;
     border-radius: 3px;
     font-size: 0.88em;
+    color: var(--color-text-red);
 }
 
 .content pre code {
@@ -619,7 +625,6 @@ main {
     text-align: right;
     margin-left: auto;
 }
-
 
 /* ============================================
    Form Section (Mobile Default)
@@ -704,7 +709,9 @@ main {
     font-family: var(--font-body);
     border: 1px solid var(--color-border);
     border-radius: 4px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
     background: var(--color-bg);
 }
 
@@ -744,7 +751,9 @@ main {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
+    transition:
+        background-color 0.2s,
+        transform 0.1s;
 }
 
 .button.is-primary {
@@ -786,7 +795,6 @@ main {
 .button.is-danger:hover {
     background: #b71c1c;
 }
-
 
 /* ============================================
    Result Box (Mobile Default)
@@ -834,7 +842,6 @@ main {
     color: var(--color-text-light);
     margin-top: 0.25rem;
 }
-
 
 /* ============================================
    Docs Section (Mobile Default)
@@ -922,10 +929,18 @@ main {
     color: white;
 }
 
-.method-tag.is-get { background: #2196f3; }
-.method-tag.is-post { background: #4caf50; }
-.method-tag.is-put { background: #ff9800; }
-.method-tag.is-delete { background: #f44336; }
+.method-tag.is-get {
+    background: #2196f3;
+}
+.method-tag.is-post {
+    background: #4caf50;
+}
+.method-tag.is-put {
+    background: #ff9800;
+}
+.method-tag.is-delete {
+    background: #f44336;
+}
 
 .docs-subsection {
     margin-bottom: 2rem;
@@ -939,7 +954,6 @@ main {
     padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-border);
 }
-
 
 /* ============================================
    Panel / Admin Layout (Mobile Default)
@@ -1085,7 +1099,6 @@ main {
     color: var(--color-text);
 }
 
-
 /* ============================================
    Post Management (Mobile Default)
    ============================================ */
@@ -1146,7 +1159,6 @@ main {
     display: flex;
     gap: var(--spacing-sm);
 }
-
 
 /* ============================================
    Posts Table (Mobile Default)
@@ -1251,7 +1263,6 @@ main {
     border-color: #d32f2f;
 }
 
-
 /* ============================================
    Edit Form (Mobile Default)
    ============================================ */
@@ -1301,7 +1312,6 @@ main {
     max-width: 600px;
     margin: 0 auto;
 }
-
 
 /* ============================================
    Utilities (Mobile Default)
@@ -1388,7 +1398,6 @@ main {
     width: 100%;
 }
 
-
 /* ============================================
    Error Page
    ============================================ */
@@ -1425,7 +1434,6 @@ main {
     color: var(--color-text-light);
     margin-bottom: var(--spacing-lg);
 }
-
 
 /* ============================================
    Desktop Enhancements (min-width: 769px)
@@ -1538,7 +1546,6 @@ main {
     }
 }
 
-
 /* ============================================
    Small Desktop Adjustments (min-width: 1100px)
    ============================================ */
@@ -1549,7 +1556,6 @@ main {
         padding: 0;
     }
 }
-
 
 /* ============================================
    Pagination

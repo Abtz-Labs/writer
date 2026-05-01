@@ -95,10 +95,20 @@ describe('Metadata Service', () => {
     });
 
     test('removes markdown syntax', () => {
-      const withMarkdown = '# Header\n![alt](img.jpg)\n[link](url.com)';
+      const withMarkdown = '# Header\n![alt](img.jpg)\n[link](url.com)\n**bold** and ~strike~';
       const excerpt = metadata.generateExcerpt(withMarkdown);
       expect(excerpt).not.toContain('[');
       expect(excerpt).not.toContain('!');
+      expect(excerpt).not.toContain('*');
+      expect(excerpt).not.toContain('~');
+    });
+
+    test('removes strikethrough content entirely', () => {
+      const withStrikethrough = 'This is ~removed~ text with ~~also removed~~ content';
+      const excerpt = metadata.generateExcerpt(withStrikethrough);
+      expect(excerpt).not.toContain('removed');
+      expect(excerpt).not.toContain('also removed');
+      expect(excerpt).toBe('This is  text with  content');
     });
   });
 

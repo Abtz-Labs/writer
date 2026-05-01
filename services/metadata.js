@@ -68,14 +68,16 @@ function generateMetaDescription(body) {
   const plainText = body
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[.*?\]\(.*?\)/g, '')
-    .replace(/[#*_`]/g, '')
+    .replace(/~~[\s\S]+?~~/g, '')
+    .replace(/~[\s\S]+?~/g, '')
+    .replace(/[#*_`~]/g, '')
     .replace(/\n+/g, ' ')
     .trim();
-  
+
   if (plainText.length <= 160) {
     return plainText;
   }
-  
+
   return plainText.substring(0, 157).trim() + '...';
 }
 
@@ -94,14 +96,16 @@ function generateExcerpt(body, maxLength = 200) {
   const plainText = body
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[.*?\]\(.*?\)/g, '')
-    .replace(/[#*_`]/g, '')
+    .replace(/~~[\s\S]+?~~/g, '')
+    .replace(/~[\s\S]+?~/g, '')
+    .replace(/[#*_`~]/g, '')
     .replace(/\n+/g, ' ')
     .trim();
-  
+
   if (plainText.length <= maxLength) {
     return plainText;
   }
-  
+
   return plainText.substring(0, maxLength - 3).trim() + '...';
 }
 
