@@ -18,7 +18,9 @@ class SettingsController {
       }
       
       const settings = Settings.fromDB(settingsObj);
-      res.json(settings.toJSON());
+      const json = settings.toJSON();
+      delete json.auth_token;
+      res.json(json);
     } catch (err) {
       next(err);
     }

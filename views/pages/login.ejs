@@ -9,14 +9,15 @@
             <div class="notification is-danger is-light mb-4"><%= error %></div>
             <% } %>
             <input type="hidden" name="redirect" value="<%= redirectTo %>">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <% if (showUsername) { %>
                 <div class="field">
                     <label class="label" for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Enter username">
+                    <input type="text" id="username" name="username" autocomplete="username" placeholder="Enter username">
                 </div>
                 <div class="field">
                     <label class="label" for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="Enter password">
+                    <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Enter password">
                 </div>
                 <div class="field">
                     <label class="label">Or use auth token</label>
@@ -24,7 +25,7 @@
             <% } %>
             <div class="field">
                 <label class="label" for="token">Auth Token</label>
-                <input type="password" id="token" name="token" <%= tokenRequired ? 'required' : '' %> placeholder="Enter your auth token">
+                <input type="password" id="token" name="token" autocomplete="current-password" <%= tokenRequired ? 'required' : '' %> placeholder="Enter your auth token">
             </div>
             <button type="submit" class="button is-primary is-fullwidth">Login</button>
         </div>

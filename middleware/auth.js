@@ -44,4 +44,23 @@ async function authMiddleware(req, res, next) {
   }
 }
 
+async function optionalAuth(req, res, next) {
+  const token = req.headers['x-auth-token'];
+  if (!token) return next();
+
+  try {
+    const settingsCollection = getCollection('settings');
+    const settingsData = await settingsCollection.find({ id: 'settings' });
+    const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+
+    if (settingsObj && settingsObj.auth_token === token) {
+      req.settings = Settings.fromDB(settingsObj);
+    }
+    next();
+  } catch (err) {
+    next();
+  }
+}
+
 module.exports = authMiddleware;
+module.exports.optionalAuth = optionalAuth;

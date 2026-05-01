@@ -8,6 +8,7 @@
         <a href="/settings">Settings</a>
         <span> | </span>
         <form method="POST" action="/logout" style="display: inline;">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
           <button type="submit" class="button-link">Logout</button>
         </form>
       </div>
@@ -141,7 +142,7 @@
 <% } %>
 
 <script>
-const authToken = '<%= token %>';
+const authToken = <%- JSON.stringify(token) %>;
 
 function showCreateForm() {
   document.querySelector('.post-list').style.display = 'none';

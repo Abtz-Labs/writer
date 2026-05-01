@@ -55,15 +55,16 @@ class PostController {
       const postsData = await postsCollection.find();
       const posts = (postsData || [])
         .map(p => Post.fromDB(p).toApiJSON())
+        .filter(p => p.status === 'published')
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-      
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
+
+      const page = Math.max(1, parseInt(req.query.page) || 1);
+      const limit = Math.min(Math.max(1, parseInt(req.query.limit) || 10), 100);
       const start = (page - 1) * limit;
       const end = start + limit;
-      
+
       const paginatedPosts = posts.slice(start, end);
-      
+
       res.json({
         posts: paginatedPosts,
         pagination: {
@@ -83,14 +84,14 @@ class PostController {
       const postsCollection = getCollection('posts');
       const allPosts = await postsCollection.find() || [];
       const post = allPosts.find(p => p.slug === req.params.slug);
-      
-      if (!post) {
+
+      if (!post || (post.status !== 'published' && !req.settings)) {
         return res.status(404).json({
           error: 'Not Found',
           message: 'Post not found'
         });
       }
-      
+
       res.json(Post.fromDB(post).toApiJSON());
     } catch (err) {
       next(err);

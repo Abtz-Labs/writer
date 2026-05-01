@@ -1,5 +1,6 @@
 const request = require('supertest');
 const app = require('../app');
+const { getCollection } = require('../config/database');
 
 describe('API Basic Tests', () => {
   test('GET /api returns docs', async () => {
@@ -8,16 +9,25 @@ describe('API Basic Tests', () => {
     expect(res.body.name).toBe('Serif Blog API');
   });
 
-  test('GET /api/posts returns array', async () => {
+  test('GET /api/posts returns only published posts', async () => {
     const res = await request(app).get('/api/posts');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body.posts)).toBe(true);
+    res.body.posts.forEach(post => {
+      expect(post.status).toBe('published');
+    });
   });
 
-  test('GET /api/settings returns status', async () => {
+  test('GET /api/posts/:slug rejects draft for unauthenticated', async () => {
+    const res = await request(app).get('/api/posts/nonexistent-draft-post');
+    expect(res.status).toBe(404);
+  });
+
+  test('GET /api/settings does not leak auth_token', async () => {
     const res = await request(app).get('/api/settings');
     expect(res.status).toBe(200);
     expect('onboarding_complete' in res.body).toBe(true);
+    expect(res.body.auth_token).toBeUndefined();
   });
 });
 
@@ -32,8 +42,10 @@ describe('API Destructive Actions Confirmation Flow', () => {
     if (onboardRes.status === 201) {
       authToken = onboardRes.body.auth_token;
     } else {
-      const settingsRes = await request(app).get('/api/settings');
-      authToken = settingsRes.body.auth_token;
+      const settingsCollection = getCollection('settings');
+      const settingsData = await settingsCollection.find({ id: 'settings' });
+      const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+      authToken = settingsObj ? settingsObj.auth_token : '';
     }
   });
 

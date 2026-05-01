@@ -4,9 +4,9 @@
 
   <div class="docs-subsection">
     <h2 class="title is-4">Authentication</h2>
-    <p>Most endpoints are public. Protected endpoints require the <code>X-Auth-Token</code> header:</p>
+    <p>Protected endpoints require the <code>X-Auth-Token</code> header:</p>
     <pre><code>X-Auth-Token: your-auth-token-here</code></pre>
-    <p>Get your token from the <a href="/onboarding">onboarding</a> page (first time) or <code>GET /api/settings</code>.</p>
+    <p>Get your token from the <a href="/onboarding">onboarding</a> page (first time only). The token is not returned by <code>GET /api/settings</code> for security.</p>
   </div>
 
   <div class="docs-subsection">
@@ -19,25 +19,30 @@
 
     <div class="endpoint">
       <h3><span class="method-tag is-get">GET</span> /api/posts</h3>
-      <p>List all blog posts with pagination.</p>
+      <p>List all <strong>published</strong> blog posts with pagination. Drafts are never included.</p>
       <p><strong>Query Parameters:</strong></p>
       <ul>
         <li><code>page</code> - Page number (default: 1)</li>
-        <li><code>limit</code> - Posts per page (default: 10)</li>
+        <li><code>limit</code> - Posts per page (default: 10, max: 100)</li>
       </ul>
       <pre><code>curl http://localhost:8080/api/posts?page=1&limit=5</code></pre>
     </div>
 
     <div class="endpoint">
       <h3><span class="method-tag is-get">GET</span> /api/posts/:slug</h3>
-      <p>Get a single post by its URL slug.</p>
+      <p>Get a single published post by its URL slug. Drafts return 404 unless you provide a valid <code>X-Auth-Token</code>.</p>
       <pre><code>curl http://localhost:8080/api/posts/my-post-slug</code></pre>
     </div>
 
     <div class="endpoint">
       <h3><span class="method-tag is-get">GET</span> /api/settings</h3>
-      <p>Get blog settings (title, author, description).</p>
+      <p>Get blog settings (title, author, description, show_docs). The <code>auth_token</code> field is intentionally omitted.</p>
       <pre><code>curl http://localhost:8080/api/settings</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-get">GET</span> /feed.xml</h3>
+      <p>RSS 2.0 feed with up to 20 published posts.</p>
     </div>
   </div>
 
@@ -49,12 +54,12 @@
       <h3><span class="method-tag is-post">POST</span> /api/posts</h3>
       <p>Create a new blog post.</p>
       <p><strong>Required:</strong> <code>title</code>, <code>body</code></p>
-      <p><strong>Optional:</strong> <code>tags</code> (array)</p>
+      <p><strong>Optional:</strong> <code>tags</code> (array), <code>cover_image</code> (URL), <code>status</code> (<code>draft</code> or <code>published</code>)</p>
       <pre><code>curl -X POST http://localhost:8080/api/posts \
   -H "Content-Type: application/json" \
   -H "X-Auth-Token: YOUR_TOKEN" \
-  -d '{"title": "My Post", "body": "Content here", "tags": ["tech"]}'</code></pre>
-      <p><strong>Auto-generated:</strong> <code>slug</code>, <code>keywords</code>, <code>meta_description</code>, <code>reading_time</code></p>
+  -d '{"title": "My Post", "body": "Content here", "tags": ["tech"], "status": "published"}'</code></pre>
+      <p><strong>Auto-generated:</strong> <code>slug</code>, <code>keywords</code>, <code>meta_description</code>, <code>reading_time</code>, <code>excerpt</code></p>
     </div>
 
     <div class="endpoint">
@@ -81,7 +86,7 @@
     <div class="endpoint">
       <h3><span class="method-tag is-put">PUT</span> /api/settings</h3>
       <p>Update blog settings.</p>
-      <p><strong>Optional:</strong> <code>title</code>, <code>author</code>, <code>description</code>, <code>show_docs</code></p>
+      <p><strong>Optional:</strong> <code>title</code>, <code>author</code>, <code>description</code>, <code>custom_scripts</code>, <code>show_docs</code></p>
       <pre><code>curl -X PUT http://localhost:8080/api/settings \
   -H "Content-Type: application/json" \
   -H "X-Auth-Token: YOUR_TOKEN" \
@@ -89,8 +94,17 @@
     </div>
 
     <div class="endpoint">
+      <h3><span class="method-tag is-put">PUT</span> /api/settings/credentials</h3>
+      <p>Update the admin username and password. Send an empty <code>password</code> to keep the current one.</p>
+      <pre><code>curl -X PUT http://localhost:8080/api/settings/credentials \
+  -H "Content-Type: application/json" \
+  -H "X-Auth-Token: YOUR_TOKEN" \
+  -d '{"username": "admin", "password": "newpass"}'</code></pre>
+    </div>
+
+    <div class="endpoint">
       <h3><span class="method-tag is-post">POST</span> /api/settings/rotate-token</h3>
-      <p>Rotate the auth token. <strong>This action requires confirmation.</strong></p>
+      <p>Rotate the auth token. <strong>This action requires confirmation.</strong> Any application using the old token will lose access.</p>
       <pre><code>curl -X POST http://localhost:8080/api/settings/rotate-token \
   -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
       <p><strong>Response:</strong></p>
@@ -102,10 +116,32 @@
 
     <div class="endpoint">
       <h3><span class="method-tag is-post">POST</span> /api/confirm/:token</h3>
-      <p>Confirm a pending destructive action. Use the <code>confirmation_url</code> returned by the original request.</p>
+      <p>Confirm a pending destructive action. Use the <code>confirmation_url</code> returned by the original request. Confirmation tokens expire after 10 minutes.</p>
       <pre><code>curl -X POST http://localhost:8080/api/confirm/abc123... \
   -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
+      <p><strong>Expired/invalid token response:</strong> <code>410 Gone</code></p>
     </div>
+  </div>
+
+  <div class="docs-subsection">
+    <h2 class="title is-4">Confirmation Flow Example</h2>
+    <p>Deleting a post is a two-step process:</p>
+    <pre><code># Step 1: Request deletion → get confirmation URL
+curl -X DELETE http://localhost:8080/api/posts/my-post \
+  -H "X-Auth-Token: YOUR_TOKEN"
+
+# Response:
+# {
+#   "confirmation_required": true,
+#   "confirmation_url": "/api/confirm/abc123..."
+# }
+
+# Step 2: POST the confirmation URL
+curl -X POST http://localhost:8080/api/confirm/abc123... \
+  -H "X-Auth-Token: YOUR_TOKEN"
+
+# Response:
+# { "message": "Post deleted successfully", "slug": "my-post" }</code></pre>
   </div>
 
   <div class="docs-subsection">
@@ -119,14 +155,15 @@
   "slug": "my-post",
   "body": "Content...",
   "bodyHtml": "&lt;p&gt;Content...&lt;/p&gt;",
-  "excerpt": "First 160 chars...",
-  "coverImage": "",
-  "keywords": "keyword1, keyword2",
-  "metaDescription": "Meta description...",
-  "readingTime": 2,
+  "excerpt": "First 200 chars...",
+  "cover_image": "",
+  "keywords": ["keyword1", "keyword2"],
+  "meta_description": "Meta description...",
+  "reading_time": 2,
+  "status": "published",
   "tags": ["tech"],
-  "createdAt": "2026-04-08T12:00:00Z",
-  "updatedAt": "2026-04-08T12:00:00Z"
+  "created_at": "2026-04-08T12:00:00Z",
+  "updated_at": "2026-04-08T12:00:00Z"
 }</code></pre>
     </div>
 
@@ -136,9 +173,21 @@
   "title": "My Blog",
   "author": "John Doe",
   "description": "A blog about tech",
-  "onboardingComplete": true,
-  "showDocs": true
+  "onboarding_complete": true,
+  "show_docs": true,
+  "hasPassword": true
 }</code></pre>
     </div>
+  </div>
+
+  <div class="docs-subsection">
+    <h2 class="title is-4">Security Notes</h2>
+    <ul>
+      <li>All web forms (login, settings, logout) include CSRF tokens. Do not use the web UI endpoints programmatically without extracting the token first.</li>
+      <li>The <code>/login</code> endpoint is rate-limited to 5 attempts per 15 minutes per IP.</li>
+      <li><code>/api/onboarding</code> is rate-limited to 5 attempts per hour.</li>
+      <li>Draft posts are never returned by public API endpoints.</li>
+      <li>Passwords are hashed with scrypt. Legacy SHA256 hashes are still accepted for backward compatibility.</li>
+    </ul>
   </div>
 </section>

@@ -6,6 +6,7 @@ const ejs = require('ejs');
 const cookieSession = require('cookie-session');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const crypto = require('crypto');
 
 const apiRoutes = require('./routes/api');
 const webRoutes = require('./routes/web');
@@ -21,7 +22,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use((req, res, next) => {
   const originalRender = res.render.bind(res);
   res.render = (view, data, callback) => {
-    const renderData = { ...data };
+    const renderData = { ...data, csrfToken: req.session?.csrfToken };
     ejs.renderFile(path.join(__dirname, 'views', 'pages', view + '.ejs'), renderData, (err, content) => {
       if (err) {
         if (callback) callback(err);
@@ -44,6 +45,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", "data:", "https:"],
       scriptSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrcAttr: ["'none'"],
     },
   },
 }));
@@ -57,18 +59,57 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  message: { error: 'Too many requests', message: 'Too many login attempts. Please try again later.' },
+});
+app.use('/login', loginLimiter);
+
+const sessionKey = process.env.SESSION_KEY;
+if (!sessionKey) {
+  logger.warn('SESSION_KEY not set. Using a random key that will change on restart.');
+}
 app.use(cookieSession({
   name: 'session',
-  keys: [process.env.SESSION_KEY || 'default-secret-key-change-in-production'],
-  maxAge: 24 * 60 * 60 * 1000
+  keys: [sessionKey || crypto.randomBytes(32).toString('hex')],
+  maxAge: 24 * 60 * 60 * 1000,
+  httpOnly: true,
+  sameSite: 'strict',
+  secure: process.env.NODE_ENV === 'production',
 }));
+
+app.use((req, res, next) => {
+  if (req.session) {
+    req.session.csrfToken = req.session.csrfToken || crypto.randomBytes(16).toString('hex');
+  }
+  next();
+});
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', webRoutes);
+function validateCsrf(req, res, next) {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  if (req.method === 'POST') {
+    const token = req.body?._csrf || req.headers['x-csrf-token'];
+    if (!token || !req.session?.csrfToken || token !== req.session.csrfToken) {
+      if (req.headers['content-type']?.includes('application/json')) {
+        return res.status(403).json({ error: 'Forbidden', message: 'Invalid or missing CSRF token' });
+      }
+      return res.status(403).send('Invalid or missing CSRF token');
+    }
+  }
+  next();
+}
+app.use('/', validateCsrf, webRoutes);
 app.use('/api', apiRoutes);
 
 app.use(notFoundHandler);

@@ -1,4 +1,4 @@
-const CryptoJS = require('crypto-js');
+const crypto = require('crypto');
 
 class Settings {
   constructor(data = {}) {
@@ -16,18 +16,44 @@ class Settings {
     this.updated_at = data.updated_at || new Date().toISOString();
   }
 
-  static generateToken(blogTitle) {
-    const timestamp = Date.now();
-    const raw = `${blogTitle}-${timestamp}`;
-    return CryptoJS.MD5(raw).toString();
+  static generateToken() {
+    return crypto.randomBytes(32).toString('hex');
   }
 
   static hashPassword(password) {
-    return CryptoJS.SHA256(password).toString();
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(password, salt, 64).toString('hex');
+    return `$scrypt$${salt}$${hash}`;
   }
 
   verifyPassword(password) {
-    return this.password_hash === Settings.hashPassword(password);
+    if (!this.password_hash) return false;
+
+    // Legacy SHA256 hashes are exactly 64 hex characters
+    const isOldHash = /^[a-f0-9]{64}$/i.test(this.password_hash);
+
+    let expectedHash;
+    if (isOldHash) {
+      expectedHash = crypto.createHash('sha256').update(password).digest('hex');
+    } else if (this.password_hash.startsWith('$scrypt$')) {
+      const parts = this.password_hash.split('$');
+      if (parts.length !== 4) return false;
+      const salt = parts[2];
+      expectedHash = crypto.scryptSync(password, salt, 64).toString('hex');
+    } else {
+      return false;
+    }
+
+    const storedHash = isOldHash ? this.password_hash : this.password_hash.split('$')[3];
+
+    try {
+      const expectedBuf = Buffer.from(expectedHash, 'hex');
+      const storedBuf = Buffer.from(storedHash, 'hex');
+      if (expectedBuf.length !== storedBuf.length) return false;
+      return crypto.timingSafeEqual(expectedBuf, storedBuf);
+    } catch {
+      return false;
+    }
   }
 
   static fromDB(obj) {

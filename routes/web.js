@@ -282,8 +282,9 @@ router.get('/post/:slug', async (req, res, next) => {
     
     const sortedPosts = allPosts
       .map(p => Post.fromDB(p).toView())
+      .filter(p => p.status === 'published')
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
+
     const currentIndex = sortedPosts.findIndex(p => p.slug === post.slug);
     const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
     const nextPost = currentIndex < sortedPosts.length - 1 ? sortedPosts[currentIndex + 1] : null;
@@ -333,9 +334,16 @@ router.get('/login', async (req, res, next) => {
 
 router.post('/login', async (req, res, next) => {
   try {
-    const { token, username, password } = req.body;
-    const redirectTo = req.body.redirect || '/';
-    
+    const rawToken = req.body.token ? String(req.body.token).trim() : '';
+    const rawUsername = req.body.username ? String(req.body.username).trim() : '';
+    const rawPassword = req.body.password ? String(req.body.password) : '';
+
+    let redirectTo = req.body.redirect || '/';
+    redirectTo = String(redirectTo).trim();
+    if (!redirectTo.startsWith('/') || redirectTo.startsWith('//')) {
+      redirectTo = '/';
+    }
+
     const settingsCollection = getCollection('settings');
     const settingsData = await settingsCollection.find({ id: 'settings' });
     const settingsObj = settingsData && settingsData.length > 0 ? settingsData[0] : null;
@@ -346,11 +354,11 @@ router.post('/login', async (req, res, next) => {
     
     const settings = Settings.fromDB(settingsObj);
     let isValid = false;
-    
-    if (token) {
-      isValid = token === settingsObj.auth_token;
-    } else if (username && password) {
-      isValid = settings.username === username && settings.verifyPassword(password);
+
+    if (rawToken) {
+      isValid = rawToken === settingsObj.auth_token;
+    } else if (rawUsername && rawPassword) {
+      isValid = settings.username === rawUsername && settings.verifyPassword(rawPassword);
     }
     
     if (isValid) {

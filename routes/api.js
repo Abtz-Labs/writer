@@ -1,9 +1,19 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const postController = require('../controllers/postController');
 const settingsController = require('../controllers/settingsController');
 const confirmationService = require('../services/confirmation');
 const authMiddleware = require('../middleware/auth');
+const { optionalAuth } = require('../middleware/auth');
+
+const onboardingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests', message: 'Too many onboarding attempts. Please try again later.' },
+});
 
 function getApiDocs(req, res) {
   const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -139,7 +149,7 @@ router.get('/health', (req, res) => {
 router.get('/', getApiDocs);
 
 router.get('/posts', postController.getAll);
-router.get('/posts/:slug', postController.getBySlug);
+router.get('/posts/:slug', optionalAuth, postController.getBySlug);
 
 router.post('/posts', authMiddleware, postController.create);
 router.put('/posts/:slug', authMiddleware, postController.update);
@@ -147,7 +157,7 @@ router.delete('/posts/:slug', authMiddleware, postController.delete);
 
 router.get('/settings', settingsController.get);
 
-router.post('/onboarding', settingsController.create);
+router.post('/onboarding', onboardingLimiter, settingsController.create);
 router.put('/settings', authMiddleware, settingsController.update);
 router.post('/settings/rotate-token', authMiddleware, settingsController.rotateToken);
 router.put('/settings/credentials', authMiddleware, settingsController.updateCredentials);
