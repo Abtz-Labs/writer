@@ -1,170 +1,334 @@
 <div class="panel-layout">
-  <nav class="panel-nav">
-    <div class="panel-nav-inner">
-      <a class="panel-logo" href="/panel">Panel</a>
-      <div class="panel-nav-links">
-        <a href="/panel">Posts</a>
-        <a href="/settings" class="is-active">Settings</a>
-        <form method="POST" action="/logout" style="display: inline;">
-          <button type="submit" class="button-link">Logout</button>
-        </form>
-      </div>
-    </div>
-  </nav>
-  <div class="panel-content">
-    <div class="panel-header">
-      <h1 class="panel-title">Settings</h1>
-      <div class="panel-actions"></div>
-    </div>
+    <nav class="panel-nav">
+        <div class="panel-nav-inner">
+            <a class="panel-logo" href="/panel">Panel</a>
+            <div class="panel-nav-links">
+                <a href="/panel">Posts</a>
+                <a href="/settings" class="is-active">Settings</a>
+                <form method="POST" action="/logout" style="display: inline">
+                    <button type="submit" class="button-link">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    <div class="panel-content">
+        <div class="notification-container"></div>
+        <div class="panel-header">
+            <h1 class="panel-title">Settings</h1>
+            <div class="panel-actions"></div>
+        </div>
 
-    <section class="form-section">
-      <div class="settings-grid">
-        <div class="box is-fullheight">
-          <h3 class="title is-5">Credentials</h3>
-          <form id="settingsForm" method="POST" action="/settings/update">
-            <div>
-                <div class="field">
-                <label class="label" for="title">Blog Title</label>
-                <input type="text" id="title" name="title" required value="<%= settings.title || '' %>">
+        <section class="form-section">
+            <div class="settings-grid">
+                <div class="box is-fullheight">
+                    <h3 class="title is-5">General</h3>
+                    <form
+                        id="settingsForm"
+                        method="POST"
+                        action="/settings/update"
+                    >
+                        <div>
+                            <div class="field">
+                                <label class="label" for="title"
+                                    >Blog Title</label
+                                >
+                                <input
+                                    type="text"
+                                    id="title"
+                                    name="title"
+                                    required
+                                    value="<%= settings.title || '' %>"
+                                />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="author"
+                                    >Author Name</label
+                                >
+                                <input
+                                    type="text"
+                                    id="author"
+                                    name="author"
+                                    value="<%= settings.author || '' %>"
+                                />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="description"
+                                    >Blog Description</label
+                                >
+                                <textarea id="description" name="description">
+<%= settings.description || '' %></textarea
+                                >
+                            </div>
+                        </div>
+                        <button
+                            type="submit"
+                            class="button is-primary is-fullwidth"
+                        >
+                            Save
+                        </button>
+                    </form>
                 </div>
-                <div class="field">
-                <label class="label" for="author">Author Name</label>
-                <input type="text" id="author" name="author" value="<%= settings.author || '' %>">
+
+                <div class="box is-fullheight">
+                    <h3 class="title is-5">Credentials</h3>
+                    <form
+                        id="credentialsForm"
+                        method="POST"
+                        action="/settings/update-credentials"
+                    >
+                        <div>
+                            <div class="field">
+                                <label class="label" for="username"
+                                    >Username</label
+                                >
+                                <input
+                                    type="text"
+                                    id="username"
+                                    name="username"
+                                    value="<%= settings.username || '' %>"
+                                    placeholder="Enter username"
+                                />
+                            </div>
+                            <div class="field">
+                                <label class="label" for="password"
+                                    >New Password</label
+                                >
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter new password"
+                                />
+                                <% if (settings.hasPassword) { %>
+                                <p class="help">
+                                    Leave blank to keep current password
+                                </p>
+                                <% } %>
+                            </div>
+                            <div class="field">
+                                <label class="label" for="confirmPassword"
+                                    >Confirm Password</label
+                                >
+                                <input
+                                    type="password"
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm new password"
+                                />
+                            </div>
+                        </div>
+                        <button
+                            type="submit"
+                            class="button is-primary is-fullwidth"
+                        >
+                            Save
+                        </button>
+                    </form>
                 </div>
-                <div class="field">
-                <label class="label" for="description">Blog Description</label>
-                <textarea id="description" name="description"><%= settings.description || '' %></textarea>
+
+                <div class="box is-fullwidth">
+                    <h3 class="title is-5">Custom Scripts</h3>
+                    <form id="customScriptsForm">
+                        <div class="field">
+                            <textarea
+                                id="customScripts"
+                                name="custom_scripts"
+                                rows="6"
+                                placeholder="<script>...</script>"
+                            ><%= settings.custom_scripts || '' %></textarea>
+                            <p class="help">
+                                Add custom script tags (e.g., analytics) to be
+                                included in every page.
+                            </p>
+                        </div>
+                        <button
+                            type="submit"
+                            class="button is-primary is-fullwidth"
+                        >
+                            Save
+                        </button>
+                    </form>
+                </div>
+
+                <div class="box is-fullwidth">
+                    <h3 class="title is-5">Security</h3>
+                    <form
+                        id="rotateTokenForm"
+                        method="POST"
+                        action="/settings/rotate-token"
+                    >
+                        <p class="mb-3">
+                            Rotate your auth token if you suspect it has been
+                            compromised. <br />
+                            <strong
+                                >Make sure to update any applications using the
+                                old token.</strong
+                            >
+                        </p>
+                        <button
+                            type="submit"
+                            class="button is-outline is-danger"
+                        >
+                            Rotate Auth Token
+                        </button>
+                    </form>
                 </div>
             </div>
-            <button type="submit" class="button is-primary is-fullwidth">Save Settings</button>
-          </form>
-        </div>
 
-        <div class="box is-fullheight">
-          <h3 class="title is-5">Credentials</h3>
-          <form id="credentialsForm" method="POST" action="/settings/update-credentials">
-            <div>
-                <div class="field">
-                <label class="label" for="username">Username</label>
-                <input type="text" id="username" name="username" value="<%= settings.username || '' %>" placeholder="Enter username">
-                </div>
-                <div class="field">
-                <label class="label" for="password">New Password</label>
-                <input type="password" id="password" name="password" placeholder="Enter new password">
-                <% if (settings.hasPassword) { %>
-                <p class="help">Leave blank to keep current password</p>
-                <% } %>
-                </div>
-                <div class="field">
-                <label class="label" for="confirmPassword">Confirm Password</label>
-                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm new password">
-                </div>
+            <div class="result-box" id="result" style="display: none">
+                <h3>Token Rotated!</h3>
+                <p>Your new auth token:</p>
+                <pre><code id="newTokenDisplay"></code></pre>
+                <p class="token-warning">
+                    Save this new token! You won't be able to see it again.
+                </p>
+                <a href="/settings" class="button is-link is-outlined mt-3"
+                    >Back to Settings</a
+                >
             </div>
-            <button type="submit" class="button is-primary is-fullwidth">Save Credentials</button>
-          </form>
-        </div>
 
-        <div class="box">
-          <h3 class="title is-5">Security</h3>
-          <form id="rotateTokenForm" method="POST" action="/settings/rotate-token">
-            <p class="mb-3">
-                Rotate your auth token if you suspect it has been compromised. <br />
-                <strong>Make sure to update any applications using the old token.</strong>
-            </p>
-            <button type="submit" class="button is-outline is-danger" onclick="return confirm('Are you sure you want to rotate your auth token? Any applications using the current token will lose access.');">
-              Rotate Auth Token
-            </button>
-          </form>
-        </div>
-      </div>
+            <script>
+                document
+                    .getElementById("settingsForm")
+                    .addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const formData = {
+                            title: document.getElementById("title").value,
+                            author: document.getElementById("author").value,
+                            description:
+                                document.getElementById("description").value,
+                        };
+                        try {
+                            const res = await fetch("/api/settings", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-Auth-Token": "<%= token %>",
+                                },
+                                body: JSON.stringify(formData),
+                            });
+                            const data = await res.json();
+                            if (data.title) {
+                                showNotification("Settings saved successfully!");
+                            } else if (data.error) {
+                                showNotification(data.message, "danger");
+                            }
+                        } catch (err) {
+                            showNotification("Failed to save settings", "danger");
+                        }
+                    });
 
-      <div class="result-box" id="result" style="display: none">
-        <h3>Token Rotated!</h3>
-        <p>Your new auth token:</p>
-        <pre><code id="newTokenDisplay"></code></pre>
-        <p class="token-warning">Save this new token! You won't be able to see it again.</p>
-        <a href="/settings" class="button is-link is-outlined mt-3">Back to Settings</a>
-      </div>
-      
-  <script>
-  document.getElementById("settingsForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = {
-      title: document.getElementById("title").value,
-      author: document.getElementById("author").value,
-      description: document.getElementById("description").value,
-    };
-    try {
-      const res = await fetch("/api/settings", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Auth-Token": "<%= token %>",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.title) {
-        alert("Settings saved successfully!");
-      } else if (data.error) {
-        alert(data.message);
-      }
-    } catch (err) {
-      alert("Failed to save settings");
-    }
-  });
+                document
+                    .getElementById("rotateTokenForm")
+                    .addEventListener("submit", (e) => {
+                        e.preventDefault();
+                        showConfirmModal({
+                            title: "Rotate Auth Token",
+                            message: "Are you sure you want to rotate your auth token? Any applications using the current token will lose access.",
+                            confirmText: "Rotate",
+                            confirmClass: "is-danger",
+                            onConfirm: async () => {
+                                try {
+                                    const res = await fetch(
+                                        "/api/settings/rotate-token",
+                                        {
+                                            method: "POST",
+                                            headers: { "X-Auth-Token": "<%= token %>" },
+                                        },
+                                    );
+                                    const data = await res.json();
+                                    if (data.auth_token) {
+                                        document.querySelector(
+                                            ".settings-grid",
+                                        ).style.display = "none";
+                                        document.getElementById(
+                                            "result",
+                                        ).style.display = "block";
+                                        document.getElementById(
+                                            "newTokenDisplay",
+                                        ).textContent = data.auth_token;
+                                        showNotification("Auth token rotated successfully!");
+                                    } else if (data.error) {
+                                        showNotification(data.message, "danger");
+                                    }
+                                } catch (err) {
+                                    showNotification("Failed to rotate token", "danger");
+                                }
+                            },
+                        });
+                    });
 
-  document.getElementById("rotateTokenForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("/api/settings/rotate-token", {
-        method: "POST",
-        headers: { "X-Auth-Token": "<%= token %>" },
-      });
-      const data = await res.json();
-      if (data.auth_token) {
-        document.querySelector(".settings-grid").style.display = "none";
-        document.getElementById("result").style.display = "block";
-        document.getElementById("newTokenDisplay").textContent = data.auth_token;
-      } else if (data.error) {
-        alert(data.message);
-      }
-    } catch (err) {
-      alert("Failed to rotate token");
-    }
-  });
+                document
+                    .getElementById("credentialsForm")
+                    .addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const password =
+                            document.getElementById("password").value;
+                        const confirmPassword =
+                            document.getElementById("confirmPassword").value;
+                        if (password && password !== confirmPassword) {
+                            showNotification("Passwords do not match", "warning");
+                            return;
+                        }
+                        const formData = {
+                            username: document.getElementById("username").value,
+                            password: password,
+                        };
+                        try {
+                            const res = await fetch(
+                                "/api/settings/credentials",
+                                {
+                                    method: "PUT",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-Auth-Token": "<%= token %>",
+                                    },
+                                    body: JSON.stringify(formData),
+                                },
+                            );
+                            const data = await res.json();
+                            if (data.username) {
+                                showNotification("Credentials saved successfully!");
+                                document.getElementById("password").value = "";
+                                document.getElementById(
+                                    "confirmPassword",
+                                ).value = "";
+                            } else if (data.error) {
+                                showNotification(data.message, "danger");
+                            }
+                        } catch (err) {
+                            showNotification("Failed to save credentials", "danger");
+                        }
+                    });
 
-  document.getElementById("credentialsForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    if (password && password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-    const formData = {
-      username: document.getElementById("username").value,
-      password: password,
-    };
-    try {
-      const res = await fetch("/api/settings/credentials", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Auth-Token": "<%= token %>",
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      if (data.username) {
-        alert("Credentials saved successfully!");
-        document.getElementById("password").value = "";
-        document.getElementById("confirmPassword").value = "";
-      } else if (data.error) {
-        alert(data.message);
-      }
-    } catch (err) {
-      alert("Failed to save credentials");
-    }
-  });
-</script>
+                document
+                    .getElementById("customScriptsForm")
+                    .addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const formData = {
+                            custom_scripts:
+                                document.getElementById("customScripts").value,
+                        };
+                        try {
+                            const res = await fetch("/api/settings", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-Auth-Token": "<%= token %>",
+                                },
+                                body: JSON.stringify(formData),
+                            });
+                            const data = await res.json();
+                            if (data.title !== undefined) {
+                                showNotification("Custom scripts saved successfully!");
+                            } else if (data.error) {
+                                showNotification(data.message, "danger");
+                            }
+                        } catch (err) {
+                            showNotification("Failed to save custom scripts", "danger");
+                        }
+                    });
+            </script>
+        </section>
+    </div>
+</div>

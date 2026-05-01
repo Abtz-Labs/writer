@@ -90,7 +90,7 @@ function getApiDocs(req, res) {
           path: '/api/settings',
           description: 'Update blog settings',
           header: 'X-Auth-Token (required)',
-          payload: { title: 'Blog title (optional)', author: 'Author name (optional)', description: 'Blog description (optional)' },
+          payload: { title: 'Blog title (optional)', author: 'Author name (optional)', description: 'Blog description (optional)', custom_scripts: 'Custom HTML/scripts (optional)' },
           response: 'Updated settings object'
         },
         {

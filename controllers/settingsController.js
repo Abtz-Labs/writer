@@ -51,6 +51,7 @@ class SettingsController {
         title,
         author: author || '',
         description: description || '',
+        custom_scripts: req.body.custom_scripts || '',
         username: username || '',
         password_hash: password ? Settings.hashPassword(password) : '',
         auth_token: authToken,
@@ -98,13 +99,14 @@ class SettingsController {
         });
       }
       
-      const { title, author, description } = req.body;
+      const { title, author, description, custom_scripts } = req.body;
       
       const updatedSettings = {
         ...existingSettings,
         title: title !== undefined ? title : existingSettings.title,
         author: author !== undefined ? author : existingSettings.author,
         description: description !== undefined ? description : existingSettings.description,
+        custom_scripts: custom_scripts !== undefined ? custom_scripts : existingSettings.custom_scripts,
         updated_at: new Date().toISOString()
       };
       
