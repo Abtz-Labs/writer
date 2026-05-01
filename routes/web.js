@@ -6,6 +6,7 @@ const Post = require('../models/post');
 const Settings = require('../models/settings');
 const requireWebAuth = require('../middleware/webAuth');
 const ogImage = require('../services/ogImage');
+const { renderGistsInHtml } = require('../services/gistRenderer');
 
 async function getSettings() {
   const settingsCollection = getCollection('settings');
@@ -291,6 +292,7 @@ router.get('/post/:slug', async (req, res, next) => {
     
     const settings = await getSettings();
     const postView = Post.fromDB(post).toView();
+    postView.bodyHtml = await renderGistsInHtml(postView.bodyHtml);
     res.render('post', { 
       post: postView,
       prevPost,

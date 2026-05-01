@@ -503,7 +503,7 @@ main {
    ============================================ */
 
 .content {
-    font-family: var(--font-heading);
+    font-family: var(--font-body);
     font-size: 1.05rem;
     line-height: 1.7;
 }
@@ -561,12 +561,13 @@ main {
 .content pre {
     background: var(--color-bg-secondary);
     padding: 1rem 1.25rem;
-    border-radius: 4px;
+    border-radius: 6px;
     overflow-x: auto;
     margin: 1.5rem 0;
     font-family: var(--font-mono);
     font-size: 0.85rem;
     line-height: 1.6;
+    border: 1px solid var(--color-border);
 }
 
 .content code {
@@ -581,6 +582,7 @@ main {
 .content pre code {
     background: none;
     padding: 0;
+    color: inherit;
 }
 
 .content ul,
@@ -597,6 +599,108 @@ main {
     border: none;
     border-top: 1px solid var(--color-border);
     margin: 2.5rem 0;
+}
+
+/* Gist embed styling */
+.gist-embed {
+    margin: 1.75rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.gist-file {
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.2s ease;
+}
+
+.gist-file:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.gist-file-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: #f6f8fa;
+    border-bottom: 1px solid #d0d7de;
+    font-size: 0.8rem;
+}
+
+.gist-icon {
+    color: #57606a;
+    flex-shrink: 0;
+}
+
+.gist-filename {
+    color: #24292f;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gist-link {
+    color: #0969da;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+    background-image: none !important;
+    transition: color 0.15s ease;
+}
+
+.gist-link:hover {
+    color: #0550ae;
+    text-decoration: underline;
+}
+
+.gist-file-body pre {
+    margin: 0;
+    padding: 1rem 1.25rem;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    overflow-x: hidden;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.gist-file-body pre code.hljs {
+    padding: 0;
+    background: transparent;
+    color: #24292e;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    tab-size: 2;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.gist-error {
+    background: var(--color-bg-secondary);
+    border: 1px dashed var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    color: var(--color-text-light);
+    font-size: 0.85rem;
+}
+
+.gist-error a {
+    color: var(--color-text);
+    font-weight: 500;
 }
 
 .post-nav {

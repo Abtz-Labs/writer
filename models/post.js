@@ -2,6 +2,53 @@ const { v4: uuidv4 } = require('uuid');
 const { marked } = require('marked');
 const xss = require('xss');
 
+const GIST_DOMAIN = 'gist.github.com';
+
+function stripNonGistScripts(html) {
+  return html.replace(/<script[\s\S]*?<\/script>/gi, (match) => {
+    const srcMatch = match.match(/src=["']([^"']+)["']/i);
+    
+    if (srcMatch) {
+      try {
+        const url = new URL(srcMatch[1]);
+        
+        if (url.hostname === GIST_DOMAIN && url.protocol === 'https:') {
+          return match;
+        }
+      } catch {
+        // invalid URL
+      }
+    }
+    
+    return '';
+  });
+}
+
+const xssOptions = {
+  whiteList: {
+    ...xss.getDefaultWhiteList(),
+    script: ['src']
+  },
+  safeAttrValue(tag, name, value, cssFilter) {
+    if (tag === 'script' && name === 'src') {
+      try {
+        const url = new URL(value);
+        
+        if (url.hostname === GIST_DOMAIN && url.protocol === 'https:') {
+          return value;
+        }
+      } catch {
+        // invalid URL
+      }
+      return '';
+    }
+    
+    return xss.safeAttrValue(tag, name, value, cssFilter);
+  }
+};
+
+const sanitizeHtml = new xss.FilterXSS(xssOptions);
+
 class Post {
   constructor(data) {
     this.id = data.id || uuidv4();
@@ -63,7 +110,7 @@ class Post {
     const json = this.toJSON();
     return {
       ...json,
-      bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true }))
+      bodyHtml: sanitizeHtml.process(stripNonGistScripts(marked.parse(this.body, { breaks: true, gfm: true })))
     };
   }
 
@@ -92,7 +139,7 @@ class Post {
     return {
       ...json,
       excerpt: cleanExcerpt,
-      bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true })),
+      bodyHtml: sanitizeHtml.process(stripNonGistScripts(marked.parse(this.body, { breaks: true, gfm: true }))),
       isPublished: this.status === 'published',
       firstImage: Post.extractFirstImage(this.body, this.cover_image)
     };

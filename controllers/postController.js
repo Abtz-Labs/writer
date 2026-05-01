@@ -4,6 +4,7 @@ const metadata = require('../services/metadata');
 const imageProcessor = require('../services/imageProcessor');
 const confirmationService = require('../services/confirmation');
 const ogImage = require('../services/ogImage');
+const { renderGistsInHtml } = require('../services/gistRenderer');
 const { marked } = require('marked');
 const path = require('path');
 const logger = require('../utils/logger');
@@ -53,10 +54,16 @@ class PostController {
     try {
       const postsCollection = getCollection('posts');
       const postsData = await postsCollection.find();
-      const posts = (postsData || [])
-        .map(p => Post.fromDB(p).toApiJSON())
-        .filter(p => p.status === 'published')
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const posts = await Promise.all(
+        (postsData || [])
+          .map(p => Post.fromDB(p).toApiJSON())
+          .filter(p => p.status === 'published')
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .map(async p => {
+            p.bodyHtml = await renderGistsInHtml(p.bodyHtml);
+            return p;
+          })
+      );
 
       const page = Math.max(1, parseInt(req.query.page) || 1);
       const limit = Math.min(Math.max(1, parseInt(req.query.limit) || 10), 100);
@@ -92,7 +99,9 @@ class PostController {
         });
       }
 
-      res.json(Post.fromDB(post).toApiJSON());
+      const apiJson = Post.fromDB(post).toApiJSON();
+      apiJson.bodyHtml = await renderGistsInHtml(apiJson.bodyHtml);
+      res.json(apiJson);
     } catch (err) {
       next(err);
     }
@@ -153,7 +162,9 @@ class PostController {
       await postsCollection.insert(postData);
       
       const post = Post.fromDB(postData);
-      res.status(201).json(post.toApiJSON());
+      const apiJson = post.toApiJSON();
+      apiJson.bodyHtml = await renderGistsInHtml(apiJson.bodyHtml);
+      res.status(201).json(apiJson);
     } catch (err) {
       next(err);
     }
@@ -231,7 +242,9 @@ class PostController {
         ogImage.clearCache(newSlug);
       }
 
-      res.json(Post.fromDB(updatedPost).toApiJSON());
+      const apiJson = Post.fromDB(updatedPost).toApiJSON();
+      apiJson.bodyHtml = await renderGistsInHtml(apiJson.bodyHtml);
+      res.json(apiJson);
     } catch (err) {
       next(err);
     }
