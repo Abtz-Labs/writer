@@ -23,6 +23,20 @@ class Post {
     return new Post(obj);
   }
 
+  static extractFirstImage(body, coverImage = '') {
+    if (!body) return coverImage || '';
+
+    // Markdown image: ![alt](url) or ![alt](url "title")
+    const mdMatch = body.match(/!\[.*?\]\((.*?)(?:\s+["'].*?["'])?\)/);
+    if (mdMatch) return mdMatch[1];
+
+    // Raw HTML image: <img src="url">
+    const htmlMatch = body.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (htmlMatch) return htmlMatch[1];
+
+    return coverImage || '';
+  }
+
   toJSON() {
     return {
       id: this.id,
@@ -58,7 +72,8 @@ class Post {
     return {
       ...json,
       bodyHtml: xss(marked.parse(this.body, { breaks: true, gfm: true })),
-      isPublished: this.status === 'published'
+      isPublished: this.status === 'published',
+      firstImage: Post.extractFirstImage(this.body, this.cover_image)
     };
   }
 }

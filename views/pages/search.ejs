@@ -21,6 +21,11 @@
       <% } else { %>
         <% posts.forEach(function(post) { %>
           <article class="post-card" data-tags="<%= post.tags ? post.tags.join(',') : '' %>">
+            <% if (post.firstImage) { %>
+              <a href="/post/<%= post.slug %>" class="post-card-image">
+                <img src="<%= post.firstImage %>" alt="<%= post.title %>" loading="lazy">
+              </a>
+            <% } %>
             <a href="/post/<%= post.slug %>" class="post-title"><%= post.title %></a>
             <p class="post-excerpt"><%= post.excerpt %></p>
             <div class="post-meta">
