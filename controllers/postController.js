@@ -172,7 +172,7 @@ class PostController {
         });
       }
       
-      const { title, body, tags, status } = req.body;
+      const { title, body, tags, cover_image, status } = req.body;
 
       const validationErrors = validatePostInput(req.body, true);
       if (validationErrors.length > 0) {
@@ -183,27 +183,37 @@ class PostController {
       }
 
       let processedBody = body || post.body;
+      let processedCoverImage = cover_image !== undefined ? (cover_image || '') : post.cover_image;
       let newSlug = post.slug;
+      const uploadDir = path.join(__dirname, '../../public/uploads');
 
       if (body) {
-        const uploadDir = path.join(__dirname, '../../public/uploads');
         try {
           processedBody = await imageProcessor.processImages(body, uploadDir);
         } catch (imgErr) {
           logger.warn('Image processing failed:', imgErr.message);
         }
-        
+
         if (title && title !== post.title) {
           const inferred = metadata.inferMetadata(title, processedBody);
           newSlug = metadata.generateUniqueSlugFromList(allPosts, inferred.slug, post.id);
         }
       }
-      
+
+      if (cover_image && cover_image.startsWith('http')) {
+        try {
+          processedCoverImage = await imageProcessor.downloadImage(cover_image, uploadDir);
+        } catch (imgErr) {
+          logger.warn('Cover image download failed:', imgErr.message);
+        }
+      }
+
       const updatedPost = {
         ...post,
         title: title || post.title,
         slug: newSlug,
         body: processedBody,
+        cover_image: processedCoverImage,
         excerpt: body ? metadata.generateExcerpt(processedBody) : post.excerpt,
         keywords: body ? metadata.extractKeywords(title || post.title, processedBody) : post.keywords,
         meta_description: body ? metadata.generateMetaDescription(processedBody) : post.meta_description,

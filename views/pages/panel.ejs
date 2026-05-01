@@ -107,6 +107,11 @@
           <input type="text" id="title" name="title" required value="">
         </div>
         <div class="field">
+          <label class="label" for="cover_image">Cover Image URL</label>
+          <input type="url" id="cover_image" name="cover_image" placeholder="https://example.com/image.jpg" value="">
+          <p class="help">Optional. Provide an external image URL or leave blank to auto-detect from body.</p>
+        </div>
+        <div class="field">
           <label class="label" for="body">Content</label>
           <div class="markdown-editor">
             <div class="markdown-toolbar">
@@ -151,6 +156,7 @@ function showCreateForm() {
   document.getElementById('postForm').action = '/api/posts';
   document.getElementById('postSlug').value = '';
   document.getElementById('title').value = '';
+  document.getElementById('cover_image').value = '';
   document.getElementById('body').value = '';
   document.getElementById('status').value = 'draft';
 }
@@ -168,6 +174,7 @@ function editPost(slug) {
     document.getElementById('postForm').action = '/api/posts/' + slug;
     document.getElementById('postSlug').value = slug;
     document.getElementById('title').value = post.title;
+    document.getElementById('cover_image').value = post.cover_image || '';
     document.getElementById('body').value = post.body || '';
     document.getElementById('status').value = post.status || 'draft';
   })
@@ -275,6 +282,7 @@ document.getElementById('postForm').addEventListener('submit', async (e) => {
   const slug = document.getElementById('postSlug').value;
   const formData = {
     title: document.getElementById('title').value,
+    cover_image: document.getElementById('cover_image').value,
     body: document.getElementById('body').value,
     status: document.getElementById('status').value
   };
