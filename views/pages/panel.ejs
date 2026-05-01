@@ -212,6 +212,15 @@ function deletePost(slug) {
   })
   .then(res => res.json())
   .then(data => {
+    if (data.confirmation_required && data.confirmation_url) {
+      return fetch(data.confirmation_url, {
+        method: 'POST',
+        headers: { 'X-Auth-Token': authToken }
+      }).then(r => r.json());
+    }
+    return data;
+  })
+  .then(data => {
     if (data.message) {
       sessionStorage.setItem('panelFlash', JSON.stringify({ message: 'Post deleted successfully', type: 'success' }));
       window.location.reload();

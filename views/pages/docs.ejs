@@ -68,9 +68,14 @@
 
     <div class="endpoint">
       <h3><span class="method-tag is-delete">DELETE</span> /api/posts/:slug</h3>
-      <p>Delete a post by its slug.</p>
+      <p>Delete a post by its slug. <strong>This action requires confirmation.</strong></p>
       <pre><code>curl -X DELETE http://localhost:8080/api/posts/my-post-slug \
   -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
+      <p><strong>Response:</strong></p>
+      <pre><code>{
+  "confirmation_required": true,
+  "confirmation_url": "/api/confirm/abc123..."
+}</code></pre>
     </div>
 
     <div class="endpoint">
@@ -81,6 +86,25 @@
   -H "Content-Type: application/json" \
   -H "X-Auth-Token: YOUR_TOKEN" \
   -d '{"title": "New Title", "author": "New Author", "show_docs": true}'</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-post">POST</span> /api/settings/rotate-token</h3>
+      <p>Rotate the auth token. <strong>This action requires confirmation.</strong></p>
+      <pre><code>curl -X POST http://localhost:8080/api/settings/rotate-token \
+  -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
+      <p><strong>Response:</strong></p>
+      <pre><code>{
+  "confirmation_required": true,
+  "confirmation_url": "/api/confirm/abc123..."
+}</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h3><span class="method-tag is-post">POST</span> /api/confirm/:token</h3>
+      <p>Confirm a pending destructive action. Use the <code>confirmation_url</code> returned by the original request.</p>
+      <pre><code>curl -X POST http://localhost:8080/api/confirm/abc123... \
+  -H "X-Auth-Token: YOUR_TOKEN"</code></pre>
     </div>
   </div>
 

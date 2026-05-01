@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
 const settingsController = require('../controllers/settingsController');
+const confirmationService = require('../services/confirmation');
 const authMiddleware = require('../middleware/auth');
 
 function getApiDocs(req, res) {
@@ -81,9 +82,9 @@ function getApiDocs(req, res) {
         {
           method: 'DELETE',
           path: '/api/posts/:slug',
-          description: 'Delete a post',
+          description: 'Delete a post (requires confirmation)',
           header: 'X-Auth-Token (required)',
-          response: '{ message: "Post deleted", slug: "..." }'
+          response: '{ confirmation_required: true, confirmation_url: "/api/confirm/..." }'
         },
         {
           method: 'PUT',
@@ -96,9 +97,16 @@ function getApiDocs(req, res) {
         {
           method: 'POST',
           path: '/api/settings/rotate-token',
-          description: 'Rotate the auth token',
+          description: 'Rotate the auth token (requires confirmation)',
           header: 'X-Auth-Token (required)',
-          response: '{ message: "Auth token rotated successfully", auth_token: "new-token" }'
+          response: '{ confirmation_required: true, confirmation_url: "/api/confirm/..." }'
+        },
+        {
+          method: 'POST',
+          path: '/api/confirm/:token',
+          description: 'Confirm a pending destructive action',
+          header: 'X-Auth-Token (required)',
+          response: 'Result of the confirmed action'
         }
       ]
     },
@@ -143,5 +151,37 @@ router.post('/onboarding', settingsController.create);
 router.put('/settings', authMiddleware, settingsController.update);
 router.post('/settings/rotate-token', authMiddleware, settingsController.rotateToken);
 router.put('/settings/credentials', authMiddleware, settingsController.updateCredentials);
+
+router.post('/confirm/:token', authMiddleware, async (req, res, next) => {
+  try {
+    const pending = await confirmationService.get(req.params.token);
+    if (!pending) {
+      return res.status(410).json({
+        error: 'Gone',
+        message: 'Confirmation token expired or invalid'
+      });
+    }
+
+    let result;
+    switch (pending.action) {
+      case 'delete-post':
+        result = await postController.executeDelete(pending.data.slug);
+        break;
+      case 'rotate-token':
+        result = await settingsController.executeRotateToken();
+        break;
+      default:
+        return res.status(400).json({
+          error: 'Bad Request',
+          message: 'Unknown confirmation action'
+        });
+    }
+
+    await confirmationService.delete(req.params.token);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = router;

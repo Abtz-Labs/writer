@@ -237,7 +237,27 @@
                                         },
                                     );
                                     const data = await res.json();
-                                    if (data.auth_token) {
+                                    if (data.confirmation_required && data.confirmation_url) {
+                                        const confirmRes = await fetch(data.confirmation_url, {
+                                            method: "POST",
+                                            headers: { "X-Auth-Token": "<%= token %>" },
+                                        });
+                                        const confirmData = await confirmRes.json();
+                                        if (confirmData.auth_token) {
+                                            document.querySelector(
+                                                ".settings-grid",
+                                            ).style.display = "none";
+                                            document.getElementById(
+                                                "result",
+                                            ).style.display = "block";
+                                            document.getElementById(
+                                                "newTokenDisplay",
+                                            ).textContent = confirmData.auth_token;
+                                            showNotification("Auth token rotated successfully!");
+                                        } else if (confirmData.error) {
+                                            showNotification(confirmData.message, "danger");
+                                        }
+                                    } else if (data.auth_token) {
                                         document.querySelector(
                                             ".settings-grid",
                                         ).style.display = "none";

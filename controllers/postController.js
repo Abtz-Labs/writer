@@ -2,6 +2,7 @@ const { getCollection, forceSavePost } = require('../config/database');
 const Post = require('../models/post');
 const metadata = require('../services/metadata');
 const imageProcessor = require('../services/imageProcessor');
+const confirmationService = require('../services/confirmation');
 const { marked } = require('marked');
 const path = require('path');
 const logger = require('../utils/logger');
@@ -219,24 +220,45 @@ class PostController {
     }
   }
   
+  async executeDelete(slug) {
+    const postsCollection = getCollection('posts');
+    const allPosts = await postsCollection.find() || [];
+    const post = allPosts.find(p => p.slug === slug);
+
+    if (!post) {
+      const error = new Error('Post not found');
+      error.status = 404;
+      throw error;
+    }
+
+    await postsCollection.delete(post.id);
+
+    return {
+      message: 'Post deleted successfully',
+      slug: slug
+    };
+  }
+
   async delete(req, res, next) {
     try {
       const postsCollection = getCollection('posts');
       const allPosts = await postsCollection.find() || [];
       const post = allPosts.find(p => p.slug === req.params.slug);
-      
+
       if (!post) {
         return res.status(404).json({
           error: 'Not Found',
           message: 'Post not found'
         });
       }
-      
-      await postsCollection.delete(post.id);
-      
-      res.json({
-        message: 'Post deleted successfully',
-        slug: req.params.slug
+
+      const token = await confirmationService.create('delete-post', { slug: req.params.slug });
+      const confirmationUrl = `/api/confirm/${token}`;
+
+      res.status(202).json({
+        confirmation_required: true,
+        message: 'This action requires confirmation. Please send a POST request to the confirmation_url to proceed.',
+        confirmation_url: confirmationUrl
       });
     } catch (err) {
       next(err);

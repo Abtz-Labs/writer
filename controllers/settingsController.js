@@ -1,5 +1,6 @@
 const { getCollection } = require('../config/database');
 const Settings = require('../models/settings');
+const confirmationService = require('../services/confirmation');
 
 class SettingsController {
   async get(req, res, next) {
@@ -61,12 +62,12 @@ class SettingsController {
       };
       
       if (existingSettings) {
-        await settingsCollection.update(settingsData);
+        await settingsCollection.update('settings', settingsData);
       } else {
         try {
           await settingsCollection.insert(settingsData);
         } catch (insertErr) {
-          await settingsCollection.update(settingsData);
+          await settingsCollection.update('settings', settingsData);
         }
       }
       
@@ -110,8 +111,8 @@ class SettingsController {
         updated_at: new Date().toISOString()
       };
       
-      await settingsCollection.update(updatedSettings);
-      
+      await settingsCollection.update('settings', updatedSettings);
+
       const settings = Settings.fromDB(updatedSettings);
       res.json(settings.toJSON());
     } catch (err) {
@@ -119,32 +120,53 @@ class SettingsController {
     }
   }
 
+  async executeRotateToken() {
+    const settingsCollection = getCollection('settings');
+    const existingData = await settingsCollection.find({ id: 'settings' });
+    const existingSettings = existingData && existingData.length > 0 ? existingData[0] : null;
+
+    if (!existingSettings) {
+      const error = new Error('Blog not configured.');
+      error.status = 404;
+      throw error;
+    }
+
+    const newToken = Settings.generateToken(existingSettings.title + '-' + Date.now());
+
+    const updatedSettings = {
+      ...existingSettings,
+      auth_token: newToken,
+      updated_at: new Date().toISOString()
+    };
+
+    await settingsCollection.update('settings', updatedSettings);
+
+    return {
+      message: 'Auth token rotated successfully',
+      auth_token: newToken
+    };
+  }
+
   async rotateToken(req, res, next) {
     try {
       const settingsCollection = getCollection('settings');
       const existingData = await settingsCollection.find({ id: 'settings' });
       const existingSettings = existingData && existingData.length > 0 ? existingData[0] : null;
-      
+
       if (!existingSettings) {
         return res.status(404).json({
           error: 'Not Found',
           message: 'Blog not configured.'
         });
       }
-      
-      const newToken = Settings.generateToken(existingSettings.title + '-' + Date.now());
-      
-      const updatedSettings = {
-        ...existingSettings,
-        auth_token: newToken,
-        updated_at: new Date().toISOString()
-      };
-      
-      await settingsCollection.update(updatedSettings);
-      
-      res.json({
-        message: 'Auth token rotated successfully',
-        auth_token: newToken
+
+      const token = await confirmationService.create('rotate-token', {});
+      const confirmationUrl = `/api/confirm/${token}`;
+
+      res.status(202).json({
+        confirmation_required: true,
+        message: 'This action requires confirmation. Please send a POST request to the confirmation_url to proceed.',
+        confirmation_url: confirmationUrl
       });
     } catch (err) {
       next(err);
