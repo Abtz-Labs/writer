@@ -14,6 +14,16 @@ async function getSettings() {
   return settingsObj ? Settings.fromDB(settingsObj).toJSON() : { title: 'Serif Blog' };
 }
 
+function escapeXml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 function fuzzyScore(query, text) {
   if (!query || !text) return 0;
   const q = query.toLowerCase().trim();
@@ -110,6 +120,56 @@ router.get('/og/:slug.png', async (req, res, next) => {
     res.set('Content-Type', 'image/png');
     res.set('Cache-Control', 'public, max-age=86400');
     res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/feed.xml', async (req, res, next) => {
+  try {
+    const settings = await getSettings();
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+    const postsCollection = getCollection('posts');
+    const postsData = await postsCollection.find() || [];
+    const publishedPosts = postsData
+      .map(p => Post.fromDB(p).toView())
+      .filter(p => p.status === 'published')
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    const lastBuildDate = publishedPosts.length > 0
+      ? new Date(publishedPosts[0].updated_at || publishedPosts[0].created_at).toUTCString()
+      : new Date().toUTCString();
+
+    let itemsXml = '';
+    for (const post of publishedPosts.slice(0, 20)) {
+      const postUrl = `${baseUrl}/post/${post.slug}`;
+      const pubDate = new Date(post.created_at).toUTCString();
+      itemsXml += `
+    <item>
+      <title>${escapeXml(post.title)}</title>
+      <link>${postUrl}</link>
+      <description><![CDATA[${post.excerpt || post.meta_description || ''}]]></description>
+      <pubDate>${pubDate}</pubDate>
+      <guid isPermaLink="true">${postUrl}</guid>
+    </item>`;
+    }
+
+    const feedXml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>${escapeXml(settings.title || 'Serif Blog')}</title>
+    <link>${baseUrl}</link>
+    <description>${escapeXml(settings.description || '')}</description>
+    <language>en-us</language>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
+    <generator>Serif Blog</generator>${itemsXml}
+  </channel>
+</rss>`;
+
+    res.set('Content-Type', 'application/rss+xml; charset=utf-8');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(feedXml.trim());
   } catch (err) {
     next(err);
   }

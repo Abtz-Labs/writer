@@ -59,6 +59,12 @@
 <%= settings.description || '' %></textarea
                                 >
                             </div>
+                            <div class="field">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showDocs" name="show_docs" <%= settings.show_docs !== false ? 'checked' : '' %>>
+                                    Show API Docs link in footer
+                                </label>
+                            </div>
                         </div>
                         <button
                             type="submit"
@@ -197,6 +203,7 @@
                             author: document.getElementById("author").value,
                             description:
                                 document.getElementById("description").value,
+                            show_docs: document.getElementById("showDocs").checked,
                         };
                         try {
                             const res = await fetch("/api/settings", {
