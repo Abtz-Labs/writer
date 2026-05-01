@@ -66,6 +66,7 @@ function generateMetaDescription(body) {
   if (!body) return '';
   
   const plainText = body
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[.*?\]\(.*?\)/g, '')
     .replace(/~~[\s\S]+?~~/g, '')
@@ -94,6 +95,7 @@ function generateExcerpt(body, maxLength = 200) {
   if (!body) return '';
   
   const plainText = body
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/!\[.*?\]\(.*?\)/g, '')
     .replace(/\[.*?\]\(.*?\)/g, '')
     .replace(/~~[\s\S]+?~~/g, '')

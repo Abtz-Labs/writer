@@ -110,6 +110,16 @@ describe('Metadata Service', () => {
       expect(excerpt).not.toContain('also removed');
       expect(excerpt).toBe('This is  text with  content');
     });
+
+    test('removes script tags and content', () => {
+      const withScript = 'Some text <script src="gist.js">alert(1)</script> more text';
+      const excerpt = metadata.generateExcerpt(withScript);
+      expect(excerpt).not.toContain('gist');
+      expect(excerpt).not.toContain('alert');
+      expect(excerpt).not.toContain('<script');
+      expect(excerpt).not.toContain('</script>');
+      expect(excerpt.trim()).toBe('Some text  more text');
+    });
   });
 
   describe('inferMetadata', () => {

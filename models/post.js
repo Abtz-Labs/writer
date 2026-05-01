@@ -76,6 +76,7 @@ class Post {
     let cleanExcerpt = '';
     if (this.body) {
       const plain = this.body
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
         .replace(/!\[.*?\]\(.*?\)/g, '')
         .replace(/\[.*?\]\(.*?\)/g, '')
         .replace(/~~[\s\S]+?~~/g, '')
