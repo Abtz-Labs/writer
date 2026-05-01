@@ -1,6 +1,7 @@
 const { getCollection } = require('../config/database');
 const Settings = require('../models/settings');
 const confirmationService = require('../services/confirmation');
+const ogImage = require('../services/ogImage');
 
 class SettingsController {
   async get(req, res, next) {
@@ -70,7 +71,9 @@ class SettingsController {
           await settingsCollection.update('settings', settingsData);
         }
       }
-      
+
+      ogImage.clearCache('site');
+
       const settings = Settings.fromDB(settingsData);
       
       res.status(201).json({
@@ -112,6 +115,8 @@ class SettingsController {
       };
       
       await settingsCollection.update('settings', updatedSettings);
+
+      ogImage.clearCache('site');
 
       const settings = Settings.fromDB(updatedSettings);
       res.json(settings.toJSON());

@@ -6,6 +6,27 @@
   <title><%= typeof title !== 'undefined' ? title : (typeof post !== 'undefined' && post ? post.title : (typeof settings !== 'undefined' && settings ? settings.title : 'Serif Blog')) %></title>
   <meta name="description" content="<%= typeof post !== 'undefined' && post ? post.meta_description : (typeof settings !== 'undefined' && settings ? settings.description : '') %>">
   <meta name="keywords" content="<%= typeof post !== 'undefined' && post ? post.keywords : '' %>">
+  <% if (typeof post !== 'undefined' && post) { %>
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="<%= post.title %>">
+    <meta property="og:description" content="<%= post.meta_description || post.excerpt || '' %>">
+    <meta property="og:url" content="<%= baseUrl %>/post/<%= post.slug %>">
+    <meta property="og:image" content="<%= baseUrl %>/og/<%= post.slug %>.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= post.title %>">
+    <meta name="twitter:description" content="<%= post.meta_description || post.excerpt || '' %>">
+    <meta name="twitter:image" content="<%= baseUrl %>/og/<%= post.slug %>.png">
+  <% } else { %>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<%= typeof title !== 'undefined' ? title : 'Serif Blog' %>">
+    <meta property="og:description" content="<%= typeof settings !== 'undefined' && settings ? settings.description || '' : '' %>">
+    <meta property="og:url" content="<%= baseUrl %>/">
+    <meta property="og:image" content="<%= baseUrl %>/og/site.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<%= typeof title !== 'undefined' ? title : 'Serif Blog' %>">
+    <meta name="twitter:description" content="<%= typeof settings !== 'undefined' && settings ? settings.description || '' : '' %>">
+    <meta name="twitter:image" content="<%= baseUrl %>/og/site.png">
+  <% } %>
   <link rel="stylesheet" href="/css/style.css">
   <% if (typeof settings !== 'undefined' && settings && settings.custom_scripts) { %>
     <%- settings.custom_scripts %>

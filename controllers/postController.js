@@ -3,6 +3,7 @@ const Post = require('../models/post');
 const metadata = require('../services/metadata');
 const imageProcessor = require('../services/imageProcessor');
 const confirmationService = require('../services/confirmation');
+const ogImage = require('../services/ogImage');
 const { marked } = require('marked');
 const path = require('path');
 const logger = require('../utils/logger');
@@ -213,7 +214,12 @@ class PostController {
       
       await postsCollection.update(updatedPost.id, updatedPost);
       forceSavePost(updatedPost);
-      
+
+      ogImage.clearCache(post.slug);
+      if (newSlug !== post.slug) {
+        ogImage.clearCache(newSlug);
+      }
+
       res.json(Post.fromDB(updatedPost).toApiJSON());
     } catch (err) {
       next(err);
@@ -232,6 +238,7 @@ class PostController {
     }
 
     await postsCollection.delete(post.id);
+    ogImage.clearCache(slug);
 
     return {
       message: 'Post deleted successfully',

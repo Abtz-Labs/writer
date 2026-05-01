@@ -1,9 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
 const { getCollection } = require('../config/database');
 const Post = require('../models/post');
 const Settings = require('../models/settings');
 const requireWebAuth = require('../middleware/webAuth');
+const ogImage = require('../services/ogImage');
 
 async function getSettings() {
   const settingsCollection = getCollection('settings');
@@ -56,6 +58,62 @@ function searchPosts(posts, query) {
   }).filter(r => r.score > 0).sort((a, b) => b.score - a.score).map(r => r.post);
   return results;
 }
+
+router.get('/og/site.png', async (req, res, next) => {
+  try {
+    const cachePath = ogImage.getCachePath('site');
+
+    if (fs.existsSync(cachePath)) {
+      return res.set('Cache-Control', 'public, max-age=86400').sendFile(cachePath);
+    }
+
+    const settings = await getSettings();
+    const byline = [settings.author, settings.description].filter(Boolean).join(' — ');
+    const buffer = await ogImage.generateOGImage(
+      settings.title || 'Serif Blog',
+      byline,
+      cachePath
+    );
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/og/:slug.png', async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const cachePath = ogImage.getCachePath(slug);
+
+    if (fs.existsSync(cachePath)) {
+      return res.set('Cache-Control', 'public, max-age=86400').sendFile(cachePath);
+    }
+
+    const postsCollection = getCollection('posts');
+    const allPosts = await postsCollection.find() || [];
+    const post = allPosts.find(p => p.slug === slug && p.status === 'published');
+
+    if (!post) {
+      return res.status(404).send('Not found');
+    }
+
+    const settings = await getSettings();
+    const buffer = await ogImage.generateOGImage(
+      post.title,
+      settings.author || settings.title || '',
+      cachePath
+    );
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (req, res, next) => {
   try {

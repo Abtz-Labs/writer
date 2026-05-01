@@ -30,6 +30,7 @@ app.use((req, res, next) => {
       }
       renderData.body = content;
       renderData.title = renderData.title || data?.post?.title || data?.settings?.title || 'Serif Blog';
+      renderData.baseUrl = `${req.protocol}://${req.get('host')}`;
       originalRender('layout', renderData, callback);
     });
   };
