@@ -50,15 +50,6 @@ app.use(helmet({
   },
 }));
 
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
-  max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests', message: 'Please slow down' },
-});
-app.use(limiter);
-
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -88,6 +79,20 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10) || 15 * 60 * 1000,
+  max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests', message: 'Please slow down' },
+  skip: (req) => {
+    if (req.session?.authToken) return true;
+    if (req.headers['x-auth-token']) return true;
+    return false;
+  },
+});
+app.use(limiter);
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));

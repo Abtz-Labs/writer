@@ -33,7 +33,7 @@ Two route groups mounted in `app.js`:
 - **API auth**: Protected endpoints require `X-Auth-Token` header, validated by `middleware/auth.js` against the stored token.
 - **Web auth**: `cookie-session` stores `req.session.authToken` after login via `/login`. Session key from `SESSION_KEY` env var. Sessions use `httpOnly`, `sameSite=strict`, and `secure` in production.
 - **Two login methods**: auth token directly, or username/password (scrypt-hashed password in settings).
-- **Rate limiting**: Login is limited to 5 attempts per 15 min. Onboarding is limited to 5 per hour.
+- **Rate limiting**: Global 100 req/15min (skipped for authenticated users). Login is limited to 5 attempts per 15 min. Onboarding is limited to 5 per hour.
 
 ### Security Model
 
@@ -45,21 +45,20 @@ Two route groups mounted in `app.js`:
 | CSRF | Per-session token injected into all EJS templates as `csrfToken`. Validated on every non-API POST. |
 | Session cookies | `cookie-session` with `httpOnly: true`, `sameSite: 'strict'`, `secure: process.env.NODE_ENV === 'production'`. |
 | CSP | `defaultSrc 'self'`, `styleSrc 'self' 'unsafe-inline'`, `imgSrc 'self' data: https:`, `scriptSrc 'self' 'unsafe-inline'`, `scriptSrcAttr 'none'`. |
-| Rate limiting | Global 100 req/15min + login-specific 5 req/15min + onboarding 5 req/hour. |
+| Rate limiting | Global 100 req/15min (skipped for authenticated users) + login-specific 5 req/15min + onboarding 5 req/hour. |
 | Draft exposure | Public API only returns `status === 'published'`. Draft slugs return 404 unless request carries a valid `X-Auth-Token`. |
 | Token leak | `GET /api/settings` strips `auth_token` from the response. |
 
 ### Post Creation Pipeline
 
 When a post is created (`POST /api/posts`) or updated:
-1. `imageProcessor.processImages()` — regex-finds image URLs in body, downloads to `public/uploads/` with UUID filenames, replaces URLs with local `/uploads/` paths. 10s timeout per image; failures keep original URL.
-2. `metadata.inferMetadata()` — generates from title + processed body:
+1. `metadata.inferMetadata()` — generates from title + body:
    - **slug**: lowercase, alphanumeric + hyphens; conflicts resolved with `-1`, `-2` suffix via `generateUniqueSlugFromList()`
    - **keywords**: top 10 words (3+ chars, excluding stop words) by frequency
    - **meta_description**: first 160 chars of plain text (Markdown stripped)
    - **reading_time**: `ceil(wordCount / 200)`, minimum 1
    - **excerpt**: first 200 chars of plain text
-3. Post inserted into JSLiteDB `posts` collection.
+2. Post inserted into JSLiteDB `posts` collection.
 
 ### Destructive Action Confirmation Flow
 
@@ -148,5 +147,5 @@ Confirmation tokens are persisted in JSLiteDB (`confirmations` collection) with 
 
 ## Docker
 
-- `Dockerfile`: Node 18-slim, production deps only, creates `data/` and `public/uploads/` dirs.
-- `docker-compose.yml`: Maps `./data:/app/data` and `./public/uploads:/app/public/uploads` for persistence.
+- `Dockerfile`: Node 18-slim, production deps only, creates `data/` dir.
+- `docker-compose.yml`: Maps `./data:/app/data` for persistence.

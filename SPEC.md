@@ -118,7 +118,6 @@
 - `POST /api/posts` — Create post (auth required)
   - Payload: `{ title, body, tags[], cover_image?, status? }`
   - Auto-generates: slug, keywords, meta_description, reading_time, excerpt
-  - Image processing: find URLs in body, download, replace with local paths
 - `PUT /api/posts/:slug` — Update post (auth required)
 - `DELETE /api/posts/:slug` — Delete post (auth required, requires confirmation via `/api/confirm/:token`)
 
@@ -129,40 +128,34 @@
 - **Reading Time**: Words / 200 (average reading speed)
 - **Excerpt**: First 200 chars of plain text
 
-**5. Image Processing**
-- Scan body for `http(s)://*.jpg`, `http(s)://*.png`, `http(s)://*.gif`
-- Download image, store locally in `/public/uploads/`
-- Replace URL with `/uploads/filename.jpg`
-- Support: jpg, png, gif, webp
-
-**6. Settings Management (API)**
+**5. Settings Management (API)**
 - `GET /api/settings` — Get blog settings (public, `auth_token` stripped)
 - `PUT /api/settings` — Update settings (auth required)
   - Payload: `{ title, author, description, custom_scripts, show_docs }`
 - `PUT /api/settings/credentials` — Update username/password (auth required)
 - `POST /api/settings/rotate-token` — Rotate auth token (auth required, requires confirmation)
 
-**7. Self-Discoverable API**
+**6. Self-Discoverable API**
 - `GET /api` — Returns API documentation
   - Available endpoints
   - Required headers
   - Expected payloads
   - Response formats
 
-**8. Open Graph Image Generation**
+**7. Open Graph Image Generation**
 - `GET /og/:slug.png` — Generates 1200×630 PNG card for a post
 - `GET /og/site.png` — Generates site-wide OG card
 - Dark theme with auto-wrapping title and author byline
 - Cached in `public/og-images/` with 24h HTTP cache headers
 - Cache invalidated on post update/delete and settings change
 
-**9. RSS Feed**
+**8. RSS Feed**
 - `GET /feed.xml` — Valid RSS 2.0 feed
 - Channel: title, link, description, language, lastBuildDate
 - Items: up to 20 published posts with title, link, description (CDATA), pubDate, guid
 - 1h HTTP cache headers
 
-**10. Custom Scripts**
+**9. Custom Scripts**
 - Admin can inject raw HTML/script tags into every page `<head>`
 - Rendered unescaped in `views/layout.ejs`
 - Useful for analytics, custom fonts, etc.
@@ -209,7 +202,6 @@
 ### Edge Cases
 - Empty title/body: Return 400 with validation error
 - Duplicate slug: Append `-1`, `-2`, etc.
-- Image download fails: Keep original URL, log warning
 - Invalid auth token: Return 401, include hint
 - Draft access without auth: Return 404 (not 403, to avoid leaking existence)
 - Confirmation token expired: Return 410 Gone
@@ -276,7 +268,6 @@
 │   └── web.js
 ├── /services
 │   ├── confirmation.js
-│   ├── imageProcessor.js
 │   ├── metadata.js
 │   └── ogImage.js
 ├── /utils
@@ -297,7 +288,6 @@
 │   │   └── footer.ejs
 │   └── layout.ejs
 ├── /public
-│   ├── /uploads
 │   ├── /og-images
 │   └── /css
 │       └── style.css
@@ -311,8 +301,7 @@
 1. **Onboarding**: First visit shows onboarding form; after submission, auth token is generated and displayed
 2. **Authentication**: All protected API endpoints reject requests without valid token
 3. **Post Creation**: POST /api/posts with title+body creates post with all inferred metadata
-4. **Image Processing**: Body URLs are downloaded and replaced with local paths
-5. **Self-Discovery**: GET /api returns complete API documentation
+4. **Self-Discovery**: GET /api returns complete API documentation
 6. **UI**: Home page shows post list; post page shows full article with proper styling
 7. **OG Images**: Social sharing cards are generated for posts and the site
 8. **RSS Feed**: /feed.xml returns valid RSS 2.0 with published posts
@@ -324,7 +313,7 @@
 
 1. Write tests first (TDD)
 2. Implement database layer
-3. Implement core services (metadata, image processing, OG images, confirmation)
+3. Implement core services (metadata, OG images, confirmation)
 4. Build API routes
 5. Create EJS templates
 6. Add Docker configuration

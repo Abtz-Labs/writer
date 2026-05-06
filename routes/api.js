@@ -76,8 +76,7 @@ function getApiDocs(req, res) {
             slug: 'Generated from title (lowercase, hyphens)',
             keywords: 'Extracted from title and body',
             meta_description: 'First 160 chars of body',
-            reading_time: 'Calculated from word count',
-            images: 'URLs in body are downloaded and replaced with local paths'
+            reading_time: 'Calculated from word count'
           },
           response: 'Created post object'
         },

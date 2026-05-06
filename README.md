@@ -46,7 +46,6 @@ curl http://localhost:8080/api/posts/my-post-slug
 - **Markdown-powered posts** with metadata inference (slug, keywords, excerpt, reading time)
 - **RESTful API** with API key authentication
 - **Admin Panel** with web-based post management and settings
-- **Image Processing** — external image URLs in post body are automatically downloaded and stored locally
 - **Tag Support** with filtering on the home page
 - **Open Graph Images** — auto-generated 1200×630 social sharing cards for every post
 - **RSS Feed** at `/feed.xml`

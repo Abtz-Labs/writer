@@ -1,10 +1,20 @@
 <footer class="footer">
     <div class="container">
-        <p>&copy; <%= new Date().getFullYear() %> <%= settings.title %></p>
-    <a href="/panel">Panel</a>
-    <% if (settings.show_docs !== false) { %>
-      <a href="/docs" target="_blank" rel="noopener noreferrer">API Docs</a>
-    <% } %>
-    <a href="/feed.xml" target="_blank" rel="noopener noreferrer">RSS Feed</a>
+        <div class="block">
+            <p>&copy; <%= new Date().getFullYear() %> <%= settings.title %></p>
+            <p>Powered by Serif</p>
+        </div>
+
+        <div class="block">
+            <a href="/panel">Panel</a>
+            <% if (settings.show_docs !== false) { %>
+            <a href="/docs" target="_blank" rel="noopener noreferrer">
+                API Docs
+            </a>
+            <% } %>
+            <a href="/feed.xml" target="_blank" rel="noopener noreferrer">
+                RSS Feed
+            </a>
+        </div>
     </div>
 </footer>
