@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-- **Project Name**: Serif Blog
+- **Project Name**: Writer
 - **Type**: Single-tenant blog web application
 - **Core Functionality**: A clean, Medium-style blog platform with RESTful API, Markdown support, automatic content metadata inference, OG image generation, and RSS feed
 - **Target Users**: Bloggers who want a simple, elegant writing experience with an AI-consumable API
@@ -21,17 +21,20 @@
 ### Layout Structure
 
 **Header**
+
 - Logo/Site title (left-aligned)
 - Navigation links (right-aligned): Home, About (if configured)
 - Minimal height, sticky on scroll
 
 **Home Page (Post List)**
+
 - Single column layout, centered, max-width 700px
 - Post cards with: title, excerpt, publication date, reading time, optional thumbnail (first image from post)
 - Pagination (10 posts per page)
 - Tag filtering
 
 **Post Detail Page**
+
 - Title (h1), large font
 - Publication date, reading time
 - Author name (if configured)
@@ -41,12 +44,14 @@
 - Open Graph meta tags for social sharing
 
 **Admin Panel**
+
 - Post list table with search, pagination (15 per page)
 - Inline post create/edit form with Markdown toolbar
 - Confirmation modal for deletes (no native `confirm()`)
 - Notification banners below navbar (sticky, visible on scroll)
 
 **Onboarding Page**
+
 - Clean form: Blog title, Author name, Description, Username, Password
 - Generates auth token
 - Instructions for API usage
@@ -54,6 +59,7 @@
 ### Visual Design
 
 **Color Palette**
+
 - Background: `#ffffff` (white)
 - Text Primary: `#292929` (near black)
 - Text Secondary: `#6b6b6b` (gray)
@@ -63,6 +69,7 @@
 - Card Hover: `#fafafa`
 
 **Typography**
+
 - Headings: `Georgia`, serif
 - Body: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`
 - Code: `Menlo, Monaco, "Courier New", monospace`
@@ -71,6 +78,7 @@
 - Heading sizes: h1=2.5rem, h2=2rem, h3=1.5rem
 
 **Spacing**
+
 - Container max-width: 700px
 - Section padding: 2rem
 - Paragraph margin: 1.5rem
@@ -79,6 +87,7 @@
 ### Components
 
 **Post Card**
+
 - Optional thumbnail image (16:9 aspect ratio, object-fit cover)
 - Title (clickable, green on hover)
 - Excerpt (2-3 lines, truncated)
@@ -86,6 +95,7 @@
 - Subtle bottom border
 
 **Article Body**
+
 - Proper paragraph spacing
 - Blockquotes with left border
 - Code blocks with background
@@ -97,6 +107,7 @@
 ### Core Features
 
 **1. Onboarding System**
+
 - First visit triggers onboarding form
 - Configures: blog title, author name, description, username, password
 - Generates random auth token: `crypto.randomBytes(32).toString('hex')`
@@ -105,6 +116,7 @@
 - Rate limited to 5 attempts per hour
 
 **2. Authentication**
+
 - API endpoints (except public GETs) require `X-Auth-Token` header
 - Web admin routes require session authentication via `/login`
 - Two login methods: auth token directly, or username/password
@@ -113,6 +125,7 @@
 - Login rate limited to 5 attempts per 15 minutes
 
 **3. Post Management (API)**
+
 - `GET /api/posts` — List published posts only (public, paginated, limit capped at 100)
 - `GET /api/posts/:slug` — Get single post (public for published; drafts require auth)
 - `POST /api/posts` — Create post (auth required)
@@ -122,6 +135,7 @@
 - `DELETE /api/posts/:slug` — Delete post (auth required, requires confirmation via `/api/confirm/:token`)
 
 **4. Content Metadata Inference**
+
 - **Slug**: From title (lowercase, hyphens, remove special chars)
 - **Keywords**: Extract from title + first 200 chars of body
 - **Meta Description**: First 160 chars of body
@@ -129,6 +143,7 @@
 - **Excerpt**: First 200 chars of plain text
 
 **5. Settings Management (API)**
+
 - `GET /api/settings` — Get blog settings (public, `auth_token` stripped)
 - `PUT /api/settings` — Update settings (auth required)
   - Payload: `{ title, author, description, custom_scripts, show_docs }`
@@ -136,6 +151,7 @@
 - `POST /api/settings/rotate-token` — Rotate auth token (auth required, requires confirmation)
 
 **6. Self-Discoverable API**
+
 - `GET /api` — Returns API documentation
   - Available endpoints
   - Required headers
@@ -143,6 +159,7 @@
   - Response formats
 
 **7. Open Graph Image Generation**
+
 - `GET /og/:slug.png` — Generates 1200×630 PNG card for a post
 - `GET /og/site.png` — Generates site-wide OG card
 - Dark theme with auto-wrapping title and author byline
@@ -150,12 +167,14 @@
 - Cache invalidated on post update/delete and settings change
 
 **8. RSS Feed**
+
 - `GET /feed.xml` — Valid RSS 2.0 feed
 - Channel: title, link, description, language, lastBuildDate
 - Items: up to 20 published posts with title, link, description (CDATA), pubDate, guid
 - 1h HTTP cache headers
 
 **9. Custom Scripts**
+
 - Admin can inject raw HTML/script tags into every page `<head>`
 - Rendered unescaped in `views/layout.ejs`
 - Useful for analytics, custom fonts, etc.
@@ -163,6 +182,7 @@
 ### Data Models
 
 **Post**
+
 ```json
 {
   "id": "uuid",
@@ -182,6 +202,7 @@
 ```
 
 **Settings**
+
 ```json
 {
   "id": "settings",
@@ -200,6 +221,7 @@
 ```
 
 ### Edge Cases
+
 - Empty title/body: Return 400 with validation error
 - Duplicate slug: Append `-1`, `-2`, etc.
 - Invalid auth token: Return 401, include hint
@@ -211,31 +233,31 @@
 
 ### Public Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | / | Home page (HTML) |
-| GET | /post/:slug | Post detail (HTML) |
-| GET | /search | Search page (HTML) |
-| GET | /onboarding | Onboarding page (HTML) |
-| GET | /api | API documentation (JSON) |
-| GET | /api/posts | List published posts |
-| GET | /api/posts/:slug | Get published post |
-| GET | /api/settings | Get settings (no auth_token) |
-| GET | /feed.xml | RSS 2.0 feed |
-| GET | /og/site.png | Site OG image |
-| GET | /og/:slug.png | Post OG image |
+| Method | Path             | Description                  |
+| ------ | ---------------- | ---------------------------- |
+| GET    | /                | Home page (HTML)             |
+| GET    | /post/:slug      | Post detail (HTML)           |
+| GET    | /search          | Search page (HTML)           |
+| GET    | /onboarding      | Onboarding page (HTML)       |
+| GET    | /api             | API documentation (JSON)     |
+| GET    | /api/posts       | List published posts         |
+| GET    | /api/posts/:slug | Get published post           |
+| GET    | /api/settings    | Get settings (no auth_token) |
+| GET    | /feed.xml        | RSS 2.0 feed                 |
+| GET    | /og/site.png     | Site OG image                |
+| GET    | /og/:slug.png    | Post OG image                |
 
 ### Protected Endpoints (Require X-Auth-Token)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | /api/posts | Create post |
-| PUT | /api/posts/:slug | Update post |
-| DELETE | /api/posts/:slug | Delete post (requires confirmation) |
-| PUT | /api/settings | Update settings |
-| PUT | /api/settings/credentials | Update credentials |
-| POST | /api/settings/rotate-token | Rotate token (requires confirmation) |
-| POST | /api/confirm/:token | Confirm destructive action |
+| Method | Path                       | Description                          |
+| ------ | -------------------------- | ------------------------------------ |
+| POST   | /api/posts                 | Create post                          |
+| PUT    | /api/posts/:slug           | Update post                          |
+| DELETE | /api/posts/:slug           | Delete post (requires confirmation)  |
+| PUT    | /api/settings              | Update settings                      |
+| PUT    | /api/settings/credentials  | Update credentials                   |
+| POST   | /api/settings/rotate-token | Rotate token (requires confirmation) |
+| POST   | /api/confirm/:token        | Confirm destructive action           |
 
 ## 6. Project Structure
 
@@ -302,12 +324,12 @@
 2. **Authentication**: All protected API endpoints reject requests without valid token
 3. **Post Creation**: POST /api/posts with title+body creates post with all inferred metadata
 4. **Self-Discovery**: GET /api returns complete API documentation
-6. **UI**: Home page shows post list; post page shows full article with proper styling
-7. **OG Images**: Social sharing cards are generated for posts and the site
-8. **RSS Feed**: /feed.xml returns valid RSS 2.0 with published posts
-9. **Security**: Passwords use scrypt, CSRF tokens on web forms, rate limiting on login/onboarding, drafts hidden from public API
-10. **Docker**: Application builds and runs in Docker container
-11. **TDD**: Tests exist for core functionality (metadata inference, auth, API, confirmation flow)
+5. **UI**: Home page shows post list; post page shows full article with proper styling
+6. **OG Images**: Social sharing cards are generated for posts and the site
+7. **RSS Feed**: /feed.xml returns valid RSS 2.0 with published posts
+8. **Security**: Passwords use scrypt, CSRF tokens on web forms, rate limiting on login/onboarding, drafts hidden from public API
+9. **Docker**: Application builds and runs in Docker container
+10. **TDD**: Tests exist for core functionality (metadata inference, auth, API, confirmation flow)
 
 ## 8. Development Approach
 

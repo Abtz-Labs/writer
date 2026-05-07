@@ -1,50 +1,62 @@
-const https = require('https');
-const hljs = require('highlight.js');
+const https = require("https");
+const hljs = require("highlight.js");
 
 const CACHE = new Map();
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
 
 function escapeHtml(text) {
-  if (!text) return '';
+  if (!text) return "";
   return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function extractGistId(url) {
-  const match = url.match(/gist\.github\.com\/[^/]+\/([a-f0-9]+)(?:\.js)?(?:\?.*)?$/i);
+  const match = url.match(
+    /gist\.github\.com\/[^/]+\/([a-f0-9]+)(?:\.js)?(?:\?.*)?$/i,
+  );
   return match ? match[1] : null;
 }
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
-    const req = https.get(url, {
-      headers: {
-        'User-Agent': 'Serif-Blog/1.0',
-        'Accept': 'application/vnd.github.v3+json'
+    const req = https.get(
+      url,
+      {
+        headers: {
+          "User-Agent": "Writer/1.0",
+          Accept: "application/vnd.github.v3+json",
+        },
+        timeout: 10000,
       },
-      timeout: 10000
-    }, (res) => {
-      let data = '';
-      res.setEncoding('utf8');
-      res.on('data', chunk => { data += chunk; });
-      res.on('end', () => {
-        if (res.statusCode >= 200 && res.statusCode < 300) {
-          try {
-            resolve(JSON.parse(data));
-          } catch (e) {
-            reject(new Error(`Invalid JSON from ${url}: ${e.message}`));
+      (res) => {
+        let data = "";
+        res.setEncoding("utf8");
+        res.on("data", (chunk) => {
+          data += chunk;
+        });
+        res.on("end", () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(new Error(`Invalid JSON from ${url}: ${e.message}`));
+            }
+          } else {
+            reject(
+              new Error(
+                `HTTP ${res.statusCode} from ${url}: ${data.substring(0, 200)}`,
+              ),
+            );
           }
-        } else {
-          reject(new Error(`HTTP ${res.statusCode} from ${url}: ${data.substring(0, 200)}`));
-        }
-      });
-    });
-    req.on('error', reject);
-    req.on('timeout', () => {
+        });
+      },
+    );
+    req.on("error", reject);
+    req.on("timeout", () => {
       req.destroy();
       reject(new Error(`Timeout fetching ${url}`));
     });
@@ -71,7 +83,7 @@ function highlightCode(content, language) {
 
 function renderFile(filename, content, language, gistUrl) {
   const highlighted = highlightCode(content, language);
-  const langClass = language ? `language-${language.toLowerCase()}` : '';
+  const langClass = language ? `language-${language.toLowerCase()}` : "";
 
   return `
     <div class="gist-file">
@@ -91,7 +103,8 @@ function renderFile(filename, content, language, gistUrl) {
 }
 
 async function renderGistsInHtml(html) {
-  const scriptRegex = /<script[^>]+src=["'](https:\/\/gist\.github\.com\/[^"']+)["'][^>]*><\/script>/gi;
+  const scriptRegex =
+    /<script[^>]+src=["'](https:\/\/gist\.github\.com\/[^"']+)["'][^>]*><\/script>/gi;
   const matches = Array.from(html.matchAll(scriptRegex));
 
   if (matches.length === 0) {
@@ -114,20 +127,25 @@ async function renderGistsInHtml(html) {
 
       const gistUrl = gist.html_url || `https://gist.github.com/${gistId}`;
 
-      const renderedFiles = files.map(file =>
-        renderFile(file.filename, file.content, file.language, gistUrl)
-      ).join('');
+      const renderedFiles = files
+        .map((file) =>
+          renderFile(file.filename, file.content, file.language, gistUrl),
+        )
+        .join("");
 
       const wrapper = `<div class="gist-embed">${renderedFiles}</div>`;
       result = result.replace(fullTag, wrapper);
     } catch (err) {
       console.error(`Failed to render gist ${gistId}:`, err.message);
       // Replace with a subtle fallback pointing to the gist
-      result = result.replace(fullTag, `
+      result = result.replace(
+        fullTag,
+        `
         <div class="gist-embed gist-error">
           <p>Unable to load gist. <a href="https://gist.github.com/${gistId}" target="_blank" rel="noopener noreferrer">View it on GitHub &rarr;</a></p>
         </div>
-      `);
+      `,
+      );
     }
   }
 
