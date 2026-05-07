@@ -1,6 +1,6 @@
 # Writer
 
-A simple, Medium-style blog web application with a RESTful API, Markdown support, automatic content metadata inference, and built-in security features.
+A simple, single-tenant blog web application with a RESTful API, Markdown support, automatic content metadata inference, and built-in security features.
 
 ## Quick Start
 
@@ -66,25 +66,25 @@ Visit `/docs` for the full API reference, or `GET /api` for a self-discoverable 
 
 ### Public Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /api | API documentation (JSON) |
-| GET | /api/posts | List published posts (paginated) |
-| GET | /api/posts/:slug | Get a published post |
-| GET | /api/settings | Get blog settings (no auth_token) |
-| POST | /api/onboarding | First-time blog setup |
+| Method | Path             | Description                       |
+| ------ | ---------------- | --------------------------------- |
+| GET    | /api             | API documentation (JSON)          |
+| GET    | /api/posts       | List published posts (paginated)  |
+| GET    | /api/posts/:slug | Get a published post              |
+| GET    | /api/settings    | Get blog settings (no auth_token) |
+| POST   | /api/onboarding  | First-time blog setup             |
 
 ### Protected Endpoints (require `X-Auth-Token`)
 
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | /api/posts | Create a post |
-| PUT | /api/posts/:slug | Update a post |
-| DELETE | /api/posts/:slug | Delete a post (requires confirmation) |
-| PUT | /api/settings | Update settings |
-| POST | /api/settings/rotate-token | Rotate auth token (requires confirmation) |
-| PUT | /api/settings/credentials | Update username/password |
-| POST | /api/confirm/:token | Confirm a destructive action |
+| Method | Path                       | Description                               |
+| ------ | -------------------------- | ----------------------------------------- |
+| POST   | /api/posts                 | Create a post                             |
+| PUT    | /api/posts/:slug           | Update a post                             |
+| DELETE | /api/posts/:slug           | Delete a post (requires confirmation)     |
+| PUT    | /api/settings              | Update settings                           |
+| POST   | /api/settings/rotate-token | Rotate auth token (requires confirmation) |
+| PUT    | /api/settings/credentials  | Update username/password                  |
+| POST   | /api/confirm/:token        | Confirm a destructive action              |
 
 ### Destructive Action Confirmation Flow
 

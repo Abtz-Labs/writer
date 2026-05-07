@@ -56,6 +56,16 @@ a {
     text-decoration: none;
 }
 
+a.brand {
+    margin: 0 !important;
+    display: inline-block;
+
+    font-weight: bolder;
+    font-style: italic;
+    font-family: serif;
+    font-size: 1.05rem;
+}
+
 /* ============================================
    Layout & Container (Mobile Default)
    ============================================ */
