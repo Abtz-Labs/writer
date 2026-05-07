@@ -1,47 +1,62 @@
 <section class="post-detail-section">
-  <article>
-    <% if (post.cover_image) { %>
-      <figure class="post-cover-image">
-        <img src="<%= post.cover_image %>" alt="<%= post.title %>">
-      </figure>
-    <% } %>
-    
-    <header>
-      <h1 class="post-detail-title"><%= post.title %></h1>
-      <div class="post-detail-meta">
-        <div class="author-detail">
-          <% if (settings.author) { %>
-            <span class="author-avatar"><%= settings.author.charAt(0).toUpperCase() %></span>
-            <span class="author-name"><%= settings.author %></span>
-          <% } %>
-        </div>
-        <span class="separator">·</span>
-        <span class="post-date"><%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
-        <span class="separator">·</span>
-        <span class="reading-time"><%= post.reading_time %> min read</span>
-      </div>
-      <% if (post.tags && post.tags.length > 0) { %>
-        <div class="post-tags">
-          <% post.tags.forEach(function(tag) { %>
-            <span class="tag is-medium"><%= tag %></span>
-          <% }); %>
-        </div>
-      <% } %>
-    </header>
-    
-    <div class="content">
-      <%- post.bodyHtml %>
-    </div>
-    
-    <% if (prevPost || nextPost) { %>
-      <nav class="post-nav">
-        <% if (prevPost) { %>
-          <a href="/post/<%= prevPost.slug %>" class="nav-prev"><span class="nav-arrow">&larr;</span> <span class="nav-title"><%= prevPost.title %></span></a>
+    <article>
+        <% if (post.cover_image) { %>
+        <figure class="post-cover-image">
+            <img src="<%= post.cover_image %>" alt="<%= post.title %>" />
+        </figure>
         <% } %>
-        <% if (nextPost) { %>
-          <a href="/post/<%= nextPost.slug %>" class="nav-next"><span class="nav-title"><%= nextPost.title %></span> <span class="nav-arrow">&rarr;</span></a>
+
+        <header>
+            <h1 class="post-detail-title"><%= post.title %></h1>
+            <div class="post-detail-meta">
+                <div class="author-detail">
+                    <% if (settings.author) { %>
+                    <span class="author-avatar"
+                        ><%= settings.author.charAt(0).toUpperCase() %></span
+                    >
+                    <span class="author-name"><%= settings.author %></span>
+                    <% } %>
+                </div>
+                <span class="separator">·</span>
+                <span class="post-date"
+                    ><%= new Date(post.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric' }) %></span
+                >
+                <span class="separator">·</span>
+                <span class="reading-time"
+                    ><%= post.reading_time %> min read</span
+                >
+            </div>
+            <% if (post.tags && post.tags.length > 0) { %>
+            <div class="post-tags">
+                <% post.tags.forEach(function(tag) { %>
+                <span class="tag is-medium"><%= tag %></span>
+                <% }); %>
+            </div>
+            <% } %>
+        </header>
+
+        <div class="content"><%- post.bodyHtml %></div>
+
+        <% if (settings && settings.about) { %>
+        <div class="post-about">
+            <h3 class="sidebar-title">About the Author</h3>
+            <p class="about-box-text"><%= settings.about %></p>
+        </div>
+        <% } %> <% if (prevPost || nextPost) { %>
+        <nav class="post-nav">
+            <% if (prevPost) { %>
+            <a href="/post/<%= prevPost.slug %>" class="nav-prev"
+                ><span class="nav-arrow">&larr;</span>
+                <span class="nav-title"><%= prevPost.title %></span></a
+            >
+            <% } %> <% if (nextPost) { %>
+            <a href="/post/<%= nextPost.slug %>" class="nav-next"
+                ><span class="nav-title"><%= nextPost.title %></span>
+                <span class="nav-arrow">&rarr;</span></a
+            >
+            <% } %>
+        </nav>
         <% } %>
-      </nav>
-    <% } %>
-  </article>
+    </article>
 </section>

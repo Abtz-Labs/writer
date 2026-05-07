@@ -136,6 +136,30 @@
                 </div>
 
                 <div class="box is-fullwidth">
+                    <h3 class="title is-5">About the Author</h3>
+                    <form id="aboutForm">
+                        <div class="field">
+                            <textarea
+                                id="about"
+                                name="about"
+                                rows="4"
+                                maxlength="280"
+                                placeholder="A brief description about yourself..."
+                            ><%= settings.about || '' %></textarea>
+                            <p class="help">
+                                Write a brief description about yourself. Max 280 characters.
+                            </p>
+                        </div>
+                        <button
+                            type="submit"
+                            class="button is-primary is-fullwidth"
+                        >
+                            Save
+                        </button>
+                    </form>
+                </div>
+
+                <div class="box is-fullwidth">
                     <h3 class="title is-5">Custom Scripts</h3>
                     <form id="customScriptsForm">
                         <div class="field">
@@ -357,6 +381,33 @@
                             }
                         } catch (err) {
                             showNotification("Failed to save custom scripts", "danger");
+                        }
+                    });
+
+                document
+                    .getElementById("aboutForm")
+                    .addEventListener("submit", async (e) => {
+                        e.preventDefault();
+                        const formData = {
+                            about: document.getElementById("about").value,
+                        };
+                        try {
+                            const res = await fetch("/api/settings", {
+                                method: "PUT",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-Auth-Token": <%- JSON.stringify(token) %>,
+                                },
+                                body: JSON.stringify(formData),
+                            });
+                            const data = await res.json();
+                            if (data.title !== undefined) {
+                                showNotification("About the author saved successfully!");
+                            } else if (data.error) {
+                                showNotification(data.message, "danger");
+                            }
+                        } catch (err) {
+                            showNotification("Failed to save about the author", "danger");
                         }
                     });
             </script>

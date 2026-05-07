@@ -9,6 +9,7 @@ class Settings {
     this.username = data.username || '';
     this.password_hash = data.password_hash || '';
     this.auth_token = data.auth_token || '';
+    this.about = data.about || '';
     this.custom_scripts = data.custom_scripts || '';
     this.onboarding_complete = data.onboarding_complete || false;
     this.show_docs = data.show_docs !== undefined ? data.show_docs : true;
@@ -69,6 +70,7 @@ class Settings {
       username: this.username,
       hasPassword: !!this.password_hash,
       auth_token: this.auth_token,
+      about: this.about,
       custom_scripts: this.custom_scripts,
       onboarding_complete: this.onboarding_complete,
       show_docs: this.show_docs,

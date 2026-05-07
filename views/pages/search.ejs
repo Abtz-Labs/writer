@@ -1,84 +1,163 @@
 <div class="container">
-  <div class="posts-section">
-    <div class="posts-grid">
-      <% if (query) { %>
-        <div class="search-header">
-          <h2 class="search-title">Search results for "<%= query %>"</h2>
-          <span class="search-count"><%= posts.length %> result<%= posts.length !== 1 ? 's' : '' %></span>
-        </div>
-      <% } %>
-
-      <% if (posts.length === 0) { %>
-        <div class="empty-state">
-          <% if (query) { %>
-            <h2>No posts found</h2>
-            <p>No posts match your search for "<%= query %>". Try different keywords.</p>
-          <% } else { %>
-            <h2>Search</h2>
-            <p>Enter a search term to find posts.</p>
-          <% } %>
-        </div>
-      <% } else { %>
-        <% posts.forEach(function(post) { %>
-          <article class="post-card" data-tags="<%= post.tags ? post.tags.join(',') : '' %>">
-            <% if (post.firstImage) { %>
-              <a href="/post/<%= post.slug %>" class="post-card-image">
-                <img src="<%= post.firstImage %>" alt="<%= post.title %>" loading="lazy">
-              </a>
-            <% } %>
-            <a href="/post/<%= post.slug %>" class="post-title"><%= post.title %></a>
-            <p class="post-excerpt"><%= post.excerpt %></p>
-            <div class="post-meta">
-              <span class="post-date"><%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></span>
-              <span class="separator">·</span>
-              <span class="reading-time"><%= post.reading_time %> min read</span>
+    <div class="posts-section">
+        <div class="posts-grid">
+            <% if (query) { %>
+            <div class="search-header">
+                <h2 class="search-title">Search results for "<%= query %>"</h2>
+                <span class="search-count"
+                    ><%= posts.length %> result<%= posts.length !== 1 ? 's' : ''
+                    %></span
+                >
             </div>
-          </article>
-        <% }); %>
+            <% } %> <% if (posts.length === 0) { %>
+            <div class="empty-state">
+                <% if (query) { %>
+                <h2>No posts found</h2>
+                <p>
+                    No posts match your search for "<%= query %>". Try different
+                    keywords.
+                </p>
+                <% } else { %>
+                <h2>Search</h2>
+                <p>Enter a search term to find posts.</p>
+                <% } %>
+            </div>
+            <% } else { %> <% posts.forEach(function(post) { %>
+            <article
+                class="post-card"
+                data-tags="<%= post.tags ? post.tags.join(',') : '' %>"
+            >
+                <% if (post.firstImage) { %>
+                <a href="/post/<%= post.slug %>" class="post-card-image">
+                    <img
+                        src="<%= post.firstImage %>"
+                        alt="<%= post.title %>"
+                        loading="lazy"
+                    />
+                </a>
+                <% } %>
+                <a href="/post/<%= post.slug %>" class="post-title"
+                    ><%= post.title %></a
+                >
+                <p class="post-excerpt"><%= post.excerpt %></p>
+                <div class="post-meta">
+                    <span class="post-date"
+                        ><%= new
+                        Date(post.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric' })
+                        %></span
+                    >
+                    <span class="separator">·</span>
+                    <span class="reading-time"
+                        ><%= post.reading_time %> min read</span
+                    >
+                </div>
+            </article>
+            <% }); %> <% if (totalPages > 1) { %>
+            <nav class="pagination">
+                <% if (prevPage) { %>
+                <a
+                    href="?q=<%= encodeURIComponent(query) %>&page=<%= prevPage %>"
+                    class="pagination-link"
+                    >&larr; prev</a
+                >
+                <% } %>
+                <span class="pagination-info"
+                    ><%= currentPage %> / <%= totalPages %></span
+                >
+                <% if (nextPage) { %>
+                <a
+                    href="?q=<%= encodeURIComponent(query) %>&page=<%= nextPage %>"
+                    class="pagination-link"
+                    >next &rarr;</a
+                >
+                <% } %>
+            </nav>
+            <% } %> <% } %>
+        </div>
 
-        <% if (totalPages > 1) { %>
-        <nav class="pagination">
-          <% if (prevPage) { %>
-            <a href="?q=<%= encodeURIComponent(query) %>&page=<%= prevPage %>" class="pagination-link">&larr; prev</a>
-          <% } %>
-          <span class="pagination-info"><%= currentPage %> / <%= totalPages %></span>
-          <% if (nextPage) { %>
-            <a href="?q=<%= encodeURIComponent(query) %>&page=<%= nextPage %>" class="pagination-link">next &rarr;</a>
-          <% } %>
-        </nav>
+        <div class="sidebar-column">
+            <div class="sidebar">
+                <div class="search-box">
+                    <h3 class="sidebar-title">Search</h3>
+                    <form action="/search" method="GET" class="search-form">
+                        <input
+                            type="text"
+                            name="q"
+                            value="<%= query %>"
+                            placeholder="Search posts..."
+                            class="search-input"
+                            autocomplete="off"
+                        />
+                        <button
+                            type="submit"
+                            class="search-button"
+                            aria-label="Search"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line
+                                    x1="21"
+                                    y1="21"
+                                    x2="16.65"
+                                    y2="16.65"
+                                ></line>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="topics-box">
+                    <h3 class="sidebar-title">Topics</h3>
+                    <div class="tag-list">
+                        <a href="/" class="tag" data-filter="">All</a>
+                        <% tags.forEach(function(tag) { %>
+                        <a
+                            href="/?tag=<%= encodeURIComponent(tag) %>"
+                            class="tag"
+                            data-filter="<%= tag %>"
+                            ><%= tag.charAt(0).toUpperCase() + tag.slice(1)
+                            %></a
+                        >
+                        <% }); %>
+                    </div>
+                </div>
+
+                <% if (settings && settings.about) { %>
+                <div class="about-box">
+                    <h3 class="sidebar-title">About the Author</h3>
+                    <p class="about-box-text"><%= settings.about %></p>
+                </div>
+                <% } %>
+            </div>
+        </div>
+
+        <% if (settings && settings.about) { %>
+        <div class="about-box-mobile">
+            <h3 class="sidebar-title">About the Author</h3>
+            <p class="about-box-text"><%= settings.about %></p>
+        </div>
         <% } %>
-      <% } %>
     </div>
-
-    <div class="sidebar">
-      <div class="search-box">
-        <h3 class="sidebar-title">Search</h3>
-        <form action="/search" method="GET" class="search-form">
-          <input type="text" name="q" value="<%= query %>" placeholder="Search posts..." class="search-input" autocomplete="off">
-          <button type="submit" class="search-button" aria-label="Search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          </button>
-        </form>
-      </div>
-
-      <h3 class="sidebar-title">Topics</h3>
-      <div class="tag-list">
-        <a href="/" class="tag" data-filter="">All</a>
-        <% tags.forEach(function(tag) { %>
-          <a href="/?tag=<%= encodeURIComponent(tag) %>" class="tag" data-filter="<%= tag %>"><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a>
-        <% }); %>
-      </div>
-    </div>
-  </div>
 </div>
 
 <script>
-(function() {
-  document.querySelectorAll('.tag-list .tag').forEach(function(tagEl) {
-    tagEl.addEventListener('click', function(e) {
-      window.location.href = this.href;
-      e.preventDefault();
-    });
-  });
-})();
+    (function () {
+        document.querySelectorAll(".tag-list .tag").forEach(function (tagEl) {
+            tagEl.addEventListener("click", function (e) {
+                window.location.href = this.href;
+                e.preventDefault();
+            });
+        });
+    })();
 </script>

@@ -159,11 +159,20 @@ main {
 }
 
 /* ============================================
+   Sidebar Column (Mobile Default)
+   ============================================ */
+
+.sidebar-column {
+    order: -1;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ============================================
    Sidebar (Mobile Default)
    ============================================ */
 
 .sidebar {
-    order: -1;
     border-bottom: 1px solid var(--color-border);
     padding-bottom: var(--spacing-md);
     margin-bottom: var(--spacing-md);
@@ -182,6 +191,7 @@ main {
     text-align: left;
 }
 
+.post-about,
 .search-box {
     margin-bottom: var(--spacing-lg);
 }
@@ -261,6 +271,30 @@ main {
     justify-content: flex-start;
     width: 100%;
     max-width: 100%;
+}
+
+/* ============================================
+   Sidebar About (Mobile Default)
+   ============================================ */
+
+.about-box {
+    display: none;
+}
+
+.about-box-mobile {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+    margin-top: var(--spacing-md);
+}
+
+.about-box-text {
+    font-size: 0.9rem;
+    color: var(--color-text-light);
+    line-height: 1.5;
+    margin: 0;
 }
 
 /* ============================================
@@ -1594,7 +1628,7 @@ main {
         order: 1;
     }
 
-    .sidebar {
+    .sidebar-column {
         order: 2;
         position: sticky;
         align-self: start;
@@ -1602,6 +1636,9 @@ main {
         max-width: 240px;
         height: fit-content;
         top: 76px;
+    }
+
+    .sidebar {
         text-align: right;
         border-bottom: none;
         padding-bottom: 0;
@@ -1611,6 +1648,10 @@ main {
     .sidebar-title {
         font-size: 0.7rem;
         text-align: right;
+    }
+
+    .topics-box {
+        margin-top: 64px;
     }
 
     .tag-list {
@@ -1626,6 +1667,22 @@ main {
         padding: 0.5rem 0.75rem;
     }
 
+    .about-box {
+        display: block;
+        text-align: right;
+        border-top: none;
+        margin-top: 64px;
+        padding-top: 0;
+    }
+
+    .about-box-mobile {
+        display: none;
+    }
+
+    .about-box-text {
+        font-size: 0.85rem;
+    }
+
     /* Post Detail */
     .post-detail-title {
         font-size: 2.5rem;
@@ -1636,6 +1693,17 @@ main {
     }
 
     /* Post Navigation */
+    .post-about {
+        margin: 64px 0;
+        padding: var(--spacing-lg) 0;
+        border-top: 1px solid var(--color-border);
+        text-align: left;
+    }
+
+    .post-about .sidebar-title {
+        text-align: left;
+    }
+
     .post-nav {
         flex-direction: row;
     }

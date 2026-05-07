@@ -105,13 +105,14 @@ class SettingsController {
         });
       }
       
-      const { title, author, description, custom_scripts, show_docs } = req.body;
+      const { title, author, description, about, custom_scripts, show_docs } = req.body;
 
       const updatedSettings = {
         ...existingSettings,
         title: title !== undefined ? title : existingSettings.title,
         author: author !== undefined ? author : existingSettings.author,
         description: description !== undefined ? description : existingSettings.description,
+        about: about !== undefined ? about : existingSettings.about,
         custom_scripts: custom_scripts !== undefined ? custom_scripts : existingSettings.custom_scripts,
         show_docs: show_docs !== undefined ? show_docs : existingSettings.show_docs,
         updated_at: new Date().toISOString()
