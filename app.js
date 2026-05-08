@@ -19,7 +19,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
-app.set('trust proxy', 1);
+app.set("trust proxy", 1);
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -53,10 +53,13 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
   let extraScriptDomains = [];
+
   try {
     const settingsCollection = getCollection("settings");
     const settingsData = await settingsCollection.find({ id: "settings" });
-    const settings = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+    const settings =
+      settingsData && settingsData.length > 0 ? settingsData[0] : null;
+
     if (settings && settings.csp_script_domains) {
       extraScriptDomains = settings.csp_script_domains
         .split(",")
@@ -67,7 +70,16 @@ app.use(async (req, res, next) => {
     // If settings can't be read, proceed with default CSP
   }
 
+  const getOrigin = (d) => {
+    try {
+      return new URL(d).origin;
+    } catch {
+      return d;
+    }
+  };
+
   const scriptSrc = ["'self'", "'unsafe-inline'", ...extraScriptDomains];
+  const connectSrc = ["'self'", ...extraScriptDomains.map(getOrigin)];
 
   helmet({
     crossOriginEmbedderPolicy: false,
@@ -78,7 +90,7 @@ app.use(async (req, res, next) => {
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
         scriptSrc,
-        connectSrc: ["'self'", ...extraScriptDomains],
+        connectSrc,
         scriptSrcAttr: ["'none'"],
       },
     },
@@ -150,12 +162,10 @@ function validateCsrf(req, res, next) {
     const token = req.body?._csrf || req.headers["x-csrf-token"];
     if (!token || !req.session?.csrfToken || token !== req.session.csrfToken) {
       if (req.headers["content-type"]?.includes("application/json")) {
-        return res
-          .status(403)
-          .json({
-            error: "Forbidden",
-            message: "Invalid or missing CSRF token",
-          });
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Invalid or missing CSRF token",
+        });
       }
       return res.status(403).send("Invalid or missing CSRF token");
     }
