@@ -12,7 +12,7 @@ import crypto from "node:crypto";
 import apiRoutes from "./routes/api.js";
 import webRoutes from "./routes/web.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
-import { closeDB } from "./config/database.js";
+import { getCollection, closeDB } from "./config/database.js";
 import logger from "./utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -51,19 +51,39 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(
+app.use(async (req, res, next) => {
+  let extraScriptDomains = [];
+  try {
+    const settingsCollection = getCollection("settings");
+    const settingsData = await settingsCollection.find({ id: "settings" });
+    const settings = settingsData && settingsData.length > 0 ? settingsData[0] : null;
+    if (settings && settings.csp_script_domains) {
+      extraScriptDomains = settings.csp_script_domains
+        .split(",")
+        .map((d) => d.trim())
+        .filter(Boolean);
+    }
+  } catch {
+    // If settings can't be read, proceed with default CSP
+  }
+
+  const scriptSrc = ["'self'", "'unsafe-inline'", ...extraScriptDomains];
+
   helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https:"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc,
+        connectSrc: ["'self'", ...extraScriptDomains],
         scriptSrcAttr: ["'none'"],
       },
     },
-  }),
-);
+  })(req, res, next);
+});
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

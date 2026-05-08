@@ -11,6 +11,7 @@ class Settings {
     this.auth_token = data.auth_token || '';
     this.about = data.about || '';
     this.custom_scripts = data.custom_scripts || '';
+    this.csp_script_domains = data.csp_script_domains || '';
     this.onboarding_complete = data.onboarding_complete || false;
     this.show_docs = data.show_docs !== undefined ? data.show_docs : true;
     this.created_at = data.created_at || new Date().toISOString();
@@ -72,6 +73,7 @@ class Settings {
       auth_token: this.auth_token,
       about: this.about,
       custom_scripts: this.custom_scripts,
+      csp_script_domains: this.csp_script_domains,
       onboarding_complete: this.onboarding_complete,
       show_docs: this.show_docs,
       created_at: this.created_at,

@@ -124,6 +124,7 @@ function getApiDocs(req, res) {
             author: "Author name (optional)",
             description: "Blog description (optional)",
             custom_scripts: "Custom HTML/scripts (optional)",
+            csp_script_domains: "Comma-separated allowed script domains for CSP (optional)",
           },
           response: "Updated settings object",
         },
