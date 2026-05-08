@@ -1,12 +1,14 @@
 {
   "name": "serif-blog",
-  "version": "1.0.0",
-  "description": "A simple, Medium-style blog webapp with RESTful API",
+  "version": "1.0.1",
+  "description": "A simple, single-tenant blog web application with RESTful API",
+  "type": "module",
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js -p 8080",
-    "test": "jest --coverage",
-    "test:watch": "jest --watch"
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "deploy": "bare deploy"
   },
   "keywords": [
     "blog",

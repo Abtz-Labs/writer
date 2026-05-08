@@ -1,4 +1,4 @@
-const metadata = require('../services/metadata');
+import * as metadata from '../services/metadata.js';
 
 describe('Metadata Service', () => {
   describe('generateSlug', () => {

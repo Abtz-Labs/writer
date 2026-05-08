@@ -1,5 +1,5 @@
-const { getCollection } = require('../config/database');
-const Settings = require('../models/settings');
+import { getCollection } from '../config/database.js';
+import Settings from '../models/settings.js';
 
 async function authMiddleware(req, res, next) {
   const token = req.headers['x-auth-token'];
@@ -62,5 +62,5 @@ async function optionalAuth(req, res, next) {
   }
 }
 
-module.exports = authMiddleware;
-module.exports.optionalAuth = optionalAuth;
+export default authMiddleware;
+export { optionalAuth };

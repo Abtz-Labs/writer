@@ -1,6 +1,6 @@
-const request = require("supertest");
-const app = require("../app");
-const { getCollection } = require("../config/database");
+import request from "supertest";
+import app from "../app.js";
+import { getCollection } from "../config/database.js";
 
 describe("API Basic Tests", () => {
   test("GET /api returns docs", async () => {

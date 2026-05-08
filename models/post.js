@@ -1,6 +1,6 @@
-const { v4: uuidv4 } = require('uuid');
-const { marked } = require('marked');
-const xss = require('xss');
+import { v4 as uuidv4 } from 'uuid';
+import { marked } from 'marked';
+import xss from 'xss';
 
 const GIST_DOMAIN = 'gist.github.com';
 
@@ -146,4 +146,4 @@ class Post {
   }
 }
 
-module.exports = Post;
+export default Post;

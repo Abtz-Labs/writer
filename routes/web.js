@@ -1,12 +1,13 @@
-const express = require("express");
+import express from "express";
+import fs from "node:fs";
+import { getCollection } from "../config/database.js";
+import Post from "../models/post.js";
+import Settings from "../models/settings.js";
+import requireWebAuth from "../middleware/webAuth.js";
+import * as ogImage from "../services/ogImage.js";
+import { renderGistsInHtml } from "../services/gistRenderer.js";
+
 const router = express.Router();
-const fs = require("fs");
-const { getCollection } = require("../config/database");
-const Post = require("../models/post");
-const Settings = require("../models/settings");
-const requireWebAuth = require("../middleware/webAuth");
-const ogImage = require("../services/ogImage");
-const { renderGistsInHtml } = require("../services/gistRenderer");
 
 async function getSettings() {
   const settingsCollection = getCollection("settings");
@@ -589,4 +590,4 @@ router.get("/posts", (req, res) => {
   res.redirect("/panel");
 });
 
-module.exports = router;
+export default router;

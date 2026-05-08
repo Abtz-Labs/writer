@@ -1,15 +1,17 @@
-const { marked } = require("marked");
+import { marked } from "marked";
 
-const { getCollection, forceSavePost } = require("../config/database");
+import { getCollection, forceSavePost } from "../config/database.js";
 
-const Post = require("../models/post");
+import Post from "../models/post.js";
 
-const metadata = require("../services/metadata");
-const confirmationService = require("../services/confirmation");
-const ogImage = require("../services/ogImage");
-const { renderGistsInHtml } = require("../services/gistRenderer");
+import * as metadata from "../services/metadata.js";
+import confirmationService from "../services/confirmation.js";
+import * as ogImage from "../services/ogImage.js";
+import { renderGistsInHtml } from "../services/gistRenderer.js";
 
-const logger = require("../utils/logger");
+import logger from "../utils/logger.js";
+
+import { v4 as uuidv4 } from "uuid";
 
 marked.setOptions({
   breaks: true,
@@ -139,7 +141,7 @@ class PostController {
       const slug = metadata.generateUniqueSlugFromList(allPosts, inferred.slug);
 
       const postData = {
-        id: require("uuid").v4(),
+        id: uuidv4(),
         title,
         slug,
         body,
@@ -288,4 +290,4 @@ class PostController {
   }
 }
 
-module.exports = new PostController();
+export default new PostController();

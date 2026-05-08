@@ -1,4 +1,4 @@
-const Post = require('../models/post');
+import Post from '../models/post.js';
 
 describe('Post Model', () => {
   describe('toView / toApiJSON', () => {

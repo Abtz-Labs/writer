@@ -1,6 +1,9 @@
-const { createCanvas } = require('@napi-rs/canvas');
-const fs = require('fs');
-const path = require('path');
+import { createCanvas } from '@napi-rs/canvas';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const OG_WIDTH = 1200;
 const OG_HEIGHT = 630;
@@ -131,7 +134,7 @@ function clearCache(slug) {
   }
 }
 
-module.exports = {
+export {
   generateOGImage,
   getCachePath,
   clearCache

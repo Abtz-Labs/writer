@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+import crypto from 'node:crypto';
 
 class Settings {
   constructor(data = {}) {
@@ -80,4 +80,4 @@ class Settings {
   }
 }
 
-module.exports = Settings;
+export default Settings;

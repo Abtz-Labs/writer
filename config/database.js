@@ -1,8 +1,11 @@
-const JSLiteDB = require('jslitedb');
-const path = require('path');
-const fs = require('fs');
+import JSLiteDB from 'jslitedb';
+import path from 'node:path';
+import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const dbPath = path.resolve(__dirname, '..', 'storage', 'data');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const dbPath = process.env.STORAGE_PATH || path.resolve(__dirname, '..', 'storage', 'data');
 
 let db;
 
@@ -41,7 +44,7 @@ function forceSavePost(post) {
   fs.writeFileSync(postsFile, JSON.stringify(data, null, 2));
 }
 
-module.exports = {
+export {
   getDB,
   getCollection,
   closeDB,

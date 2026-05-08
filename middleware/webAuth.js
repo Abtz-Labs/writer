@@ -1,4 +1,4 @@
-const { getCollection } = require('../config/database');
+import { getCollection } from '../config/database.js';
 
 async function requireWebAuth(req, res, next) {
   try {
@@ -24,4 +24,4 @@ async function requireWebAuth(req, res, next) {
   }
 }
 
-module.exports = requireWebAuth;
+export default requireWebAuth;

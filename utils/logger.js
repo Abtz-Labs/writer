@@ -10,8 +10,11 @@ function log(level, message, ...args) {
   console.log(`[${timestamp()}] [${level}] ${message}${extra}`);
 }
 
-module.exports = {
+const logger = {
   info: (msg, ...args) => log('INFO', msg, ...args),
   warn: (msg, ...args) => log('WARN', msg, ...args),
   error: (msg, ...args) => log('ERROR', msg, ...args),
 };
+
+export default logger;
+export const { info, warn, error } = logger;

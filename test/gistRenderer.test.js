@@ -1,7 +1,13 @@
-const https = require('https');
-const { renderGistsInHtml } = require('../services/gistRenderer');
+import { jest } from '@jest/globals';
 
-jest.mock('https');
+const mockHttpsGet = jest.fn();
+
+jest.unstable_mockModule('node:https', () => ({
+  default: { get: mockHttpsGet },
+  get: mockHttpsGet
+}));
+
+const { renderGistsInHtml } = await import('../services/gistRenderer.js');
 
 describe('Gist Renderer', () => {
   beforeEach(() => {
@@ -38,7 +44,7 @@ describe('Gist Renderer', () => {
       })
     };
 
-    https.get = jest.fn((url, options, callback) => {
+    mockHttpsGet.mockImplementation((url, options, callback) => {
       callback(mockResponse);
       return { on: jest.fn(), on: jest.fn() };
     });
@@ -68,7 +74,7 @@ describe('Gist Renderer', () => {
       })
     };
 
-    https.get = jest.fn((url, options, callback) => {
+    mockHttpsGet.mockImplementation((url, options, callback) => {
       callback(mockResponse);
       return { on: jest.fn(), on: jest.fn() };
     });

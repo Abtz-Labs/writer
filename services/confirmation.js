@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const { getCollection } = require('../config/database');
+import crypto from 'node:crypto';
+import { getCollection } from '../config/database.js';
 
 class ConfirmationService {
   async create(action, data, ttlMs = 5 * 60 * 1000) {
@@ -40,4 +40,4 @@ class ConfirmationService {
   }
 }
 
-module.exports = new ConfirmationService();
+export default new ConfirmationService();

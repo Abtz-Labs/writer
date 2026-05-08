@@ -1,11 +1,11 @@
-const express = require("express");
-const rateLimit = require("express-rate-limit");
+import express from "express";
+import rateLimit from "express-rate-limit";
+import postController from "../controllers/postController.js";
+import settingsController from "../controllers/settingsController.js";
+import confirmationService from "../services/confirmation.js";
+import authMiddleware, { optionalAuth } from "../middleware/auth.js";
+
 const router = express.Router();
-const postController = require("../controllers/postController");
-const settingsController = require("../controllers/settingsController");
-const confirmationService = require("../services/confirmation");
-const authMiddleware = require("../middleware/auth");
-const { optionalAuth } = require("../middleware/auth");
 
 const onboardingLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -226,4 +226,4 @@ router.post("/confirm/:token", authMiddleware, async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -1,18 +1,21 @@
-require("dotenv").config();
+import "dotenv/config";
 
-const express = require("express");
-const path = require("path");
-const ejs = require("ejs");
-const cookieSession = require("cookie-session");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-const crypto = require("crypto");
+import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import ejs from "ejs";
+import cookieSession from "cookie-session";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import crypto from "node:crypto";
 
-const apiRoutes = require("./routes/api");
-const webRoutes = require("./routes/web");
-const { errorHandler, notFoundHandler } = require("./middleware/errorHandler");
-const { closeDB } = require("./config/database");
-const logger = require("./utils/logger");
+import apiRoutes from "./routes/api.js";
+import webRoutes from "./routes/web.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
+import { closeDB } from "./config/database.js";
+import logger from "./utils/logger.js";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
@@ -152,7 +155,9 @@ if (portIndex !== -1 && args[portIndex + 1]) {
 
 let server;
 
-if (require.main === module) {
+const __filename = fileURLToPath(import.meta.url);
+
+if (process.argv[1] === __filename) {
   server = app.listen(PORT, () => {
     logger.info(`Writer Blog running at http://localhost:${PORT}`);
     logger.info(`API docs: http://localhost:${PORT}/api`);
@@ -172,4 +177,4 @@ if (require.main === module) {
   process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 }
 
-module.exports = app;
+export default app;

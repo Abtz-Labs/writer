@@ -1,5 +1,5 @@
-const https = require("https");
-const hljs = require("highlight.js");
+import https from "node:https";
+import hljs from "highlight.js";
 
 const CACHE = new Map();
 const CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour
@@ -152,4 +152,4 @@ async function renderGistsInHtml(html) {
   return result;
 }
 
-module.exports = { renderGistsInHtml };
+export { renderGistsInHtml };

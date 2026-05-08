@@ -1,7 +1,7 @@
-const { getCollection } = require('../config/database');
-const Settings = require('../models/settings');
-const confirmationService = require('../services/confirmation');
-const ogImage = require('../services/ogImage');
+import { getCollection } from '../config/database.js';
+import Settings from '../models/settings.js';
+import confirmationService from '../services/confirmation.js';
+import * as ogImage from '../services/ogImage.js';
 
 class SettingsController {
   async get(req, res, next) {
@@ -219,4 +219,4 @@ class SettingsController {
   }
 }
 
-module.exports = new SettingsController();
+export default new SettingsController();

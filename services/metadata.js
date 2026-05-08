@@ -127,7 +127,7 @@ function inferMetadata(title, body) {
   };
 }
 
-module.exports = {
+export {
   generateSlug,
   generateUniqueSlugFromList,
   extractKeywords,
