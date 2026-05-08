@@ -170,7 +170,7 @@ curl -X POST http://localhost:8080/api/confirm/abc123... \
     <div class="endpoint">
       <h3>Settings Object</h3>
       <pre><code>{
-  "title": "My Blog",
+  "title": "Writer",
   "author": "John Doe",
   "description": "A blog about tech",
   "onboarding_complete": true,
@@ -183,11 +183,8 @@ curl -X POST http://localhost:8080/api/confirm/abc123... \
   <div class="docs-subsection">
     <h2 class="title is-4">Security Notes</h2>
     <ul>
-      <li>All web forms (login, settings, logout) include CSRF tokens. Do not use the web UI endpoints programmatically without extracting the token first.</li>
-      <li>The <code>/login</code> endpoint is rate-limited to 5 attempts per 15 minutes per IP.</li>
-      <li><code>/api/onboarding</code> is rate-limited to 5 attempts per hour.</li>
+      <li>All web forms (login, settings, logout) include CSRF tokens. Do not use the web UI endpoints programmatically.</li>
       <li>Draft posts are never returned by public API endpoints.</li>
-      <li>Passwords are hashed with scrypt. Legacy SHA256 hashes are still accepted for backward compatibility.</li>
     </ul>
   </div>
 </section>
