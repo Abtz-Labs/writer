@@ -346,6 +346,7 @@ router.get("/post/:slug", async (req, res, next) => {
       nextPost,
       settings,
       previewMode,
+      isAuthenticated,
     });
   } catch (err) {
     next(err);

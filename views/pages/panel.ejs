@@ -241,6 +241,12 @@ function deletePost(slug) {
   });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const editSlug = params.get('slug');
+  if (editSlug) editPost(editSlug);
+});
+
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('[data-action]');
   if (!btn) return;
