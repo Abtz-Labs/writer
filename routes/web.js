@@ -305,17 +305,26 @@ router.get("/post/:slug", async (req, res, next) => {
   try {
     const postsCollection = getCollection("posts");
     const allPosts = (await postsCollection.find()) || [];
-    const post = allPosts.find(
-      (p) => p.slug === req.params.slug && p.status === "published",
-    );
+
+    const settings = await getSettings();
+    const isAuthenticated =
+      req.session.authToken && req.session.authToken === settings.auth_token;
+
+    const post = allPosts.find((p) => {
+      if (p.slug !== req.params.slug) return false;
+      if (p.status === "published") return true;
+      if (p.status === "draft" && isAuthenticated) return true;
+      return false;
+    });
 
     if (!post) {
-      const settings = await getSettings();
       return res.status(404).render("404", {
         message: "This post may be a draft or has been removed.",
         settings,
       });
     }
+
+    const previewMode = post.status === "draft" && isAuthenticated;
 
     const sortedPosts = allPosts
       .map((p) => Post.fromDB(p).toView())
@@ -329,7 +338,6 @@ router.get("/post/:slug", async (req, res, next) => {
         ? sortedPosts[currentIndex + 1]
         : null;
 
-    const settings = await getSettings();
     const postView = Post.fromDB(post).toView();
     postView.bodyHtml = await renderGistsInHtml(postView.bodyHtml);
     res.render("post", {
@@ -337,6 +345,7 @@ router.get("/post/:slug", async (req, res, next) => {
       prevPost,
       nextPost,
       settings,
+      previewMode,
     });
   } catch (err) {
     next(err);

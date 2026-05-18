@@ -550,6 +550,12 @@ main {
     padding: 0.2rem 0.6rem;
 }
 
+.preview-banner {
+    margin-bottom: var(--spacing-xl);
+    text-align: center;
+    font-weight: 500;
+}
+
 /* ============================================
    Post Content Typography (Mobile Default)
    ============================================ */

@@ -1,5 +1,11 @@
 <section class="post-detail-section">
     <article>
+        <% if (typeof previewMode !== 'undefined' && previewMode) { %>
+        <div class="preview-banner notification is-warning">
+            Preview mode. Only accessible because you are logged in.
+        </div>
+        <% } %>
+
         <% if (post.cover_image) { %>
         <figure class="post-cover-image">
             <img src="<%= post.cover_image %>" alt="<%= post.title %>" />
