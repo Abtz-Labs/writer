@@ -71,7 +71,7 @@
                   <%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
                 </td>
                 <td class="actions-cell">
-                  <a href="/post/<%= post.slug %>" class="btn-view">View</a>
+                  <a href="/post/<%= post.slug %>" class="btn-view"><%= post.status === 'draft' ? 'Preview' : 'View' %></a>
                   <button class="btn-edit" data-action="edit-post" data-slug="<%= post.slug %>">Edit</button>
                   <button class="btn-delete" data-action="delete-post" data-slug="<%= post.slug %>">Delete</button>
                 </td>
@@ -83,7 +83,7 @@
       </div>
 
     <% if (totalPages > 1) { %>
-      <nav class="pagination">
+      <nav id="pagination" class="pagination">
         <% if (prevPage) { %>
           <a href="?page=<%= prevPage %><%= query ? '&q=' + encodeURIComponent(query) : '' %>" class="pagination-link">&larr; prev</a>
         <% } %>
@@ -93,7 +93,6 @@
         <% } %>
       </nav>
     <% } %>
-    </div>
 
     <div id="editForm" class="edit-form" style="display: none">
       <div class="form-header">
@@ -151,6 +150,8 @@ const authToken = <%- JSON.stringify(token) %>;
 
 function showCreateForm() {
   document.querySelector('.post-list').style.display = 'none';
+  const pagination = document.getElementById('pagination');
+  if (pagination) pagination.style.display = 'none';
   document.getElementById('editForm').style.display = 'block';
   document.getElementById('formTitle').textContent = 'New Post';
   document.getElementById('postForm').action = '/api/posts';
@@ -169,6 +170,8 @@ function editPost(slug) {
   .then(res => res.json())
   .then(post => {
     document.querySelector('.post-list').style.display = 'none';
+    const pagination = document.getElementById('pagination');
+    if (pagination) pagination.style.display = 'none';
     document.getElementById('editForm').style.display = 'block';
     document.getElementById('formTitle').textContent = 'Edit Post';
     document.getElementById('postForm').action = '/api/posts/' + slug;
@@ -185,6 +188,8 @@ function editPost(slug) {
 
 function cancelEdit() {
   document.querySelector('.post-list').style.display = 'block';
+  const pagination = document.getElementById('pagination');
+  if (pagination) pagination.style.display = '';
   document.getElementById('editForm').style.display = 'none';
 }
 

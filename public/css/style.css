@@ -496,9 +496,11 @@ main {
 }
 
 .post-cover-image {
-    margin-bottom: var(--spacing-xl);
+    margin-left: 0;
+    margin-right: 0;
     border-radius: 4px;
     overflow: hidden;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 6px 12px;
 }
 
 .post-cover-image img {
@@ -606,6 +608,7 @@ main {
     height: auto;
     margin: 1.5rem 0;
     border-radius: 4px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 6px 12px;
 }
 
 .content blockquote {
