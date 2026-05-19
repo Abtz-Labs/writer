@@ -21,8 +21,8 @@
 | `GET`    | `/api`                       | No — returns API docs                                                 |
 | `GET`    | `/api/posts`                 | No — paginated (`?page=&limit=`), limit capped at 100, only published |
 | `GET`    | `/api/posts/:slug`           | No for published; draft requires `X-Auth-Token`                       |
-| `POST`   | `/api/posts`                 | Yes — `{ title, body, tags[], cover_image?, status? }`                |
-| `PUT`    | `/api/posts/:slug`           | Yes                                                                   |
+| `POST`   | `/api/posts`                 | Yes — `{ title, body, tags[], cover_image?, status?, published_at? }` |
+| `PUT`    | `/api/posts/:slug`           | Yes — `{ title?, body?, tags[], cover_image?, status?, published_at? }` |
 | `DELETE` | `/api/posts/:slug`           | Yes — returns `confirmation_url`                                      |
 | `GET`    | `/api/settings`              | No — `auth_token` is stripped from response                           |
 | `POST`   | `/api/onboarding`            | No — rate limited to 5/hour                                           |

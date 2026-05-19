@@ -19,7 +19,7 @@ marked.setOptions({
 });
 
 function validatePostInput(data, isUpdate = false) {
-  const { title, body, tags, status } = data;
+  const { title, body, tags, status, published_at } = data;
   const errors = [];
 
   if (!isUpdate || title !== undefined) {
@@ -61,6 +61,13 @@ function validatePostInput(data, isUpdate = false) {
     errors.push('Status must be either "draft" or "published"');
   }
 
+  if (published_at !== undefined && published_at !== null) {
+    const date = new Date(published_at);
+    if (isNaN(date.getTime())) {
+      errors.push("published_at must be a valid ISO 8601 date string");
+    }
+  }
+
   return errors;
 }
 
@@ -73,7 +80,7 @@ class PostController {
         (postsData || [])
           .map((p) => Post.fromDB(p).toApiJSON())
           .filter((p) => p.status === "published")
-          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+          .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
           .map(async (p) => {
             p.bodyHtml = await renderGistsInHtml(p.bodyHtml);
             return p;
@@ -124,7 +131,7 @@ class PostController {
 
   async create(req, res, next) {
     try {
-      const { title, body, tags, cover_image, status } = req.body;
+      const { title, body, tags, cover_image, status, published_at } = req.body;
 
       const validationErrors = validatePostInput(req.body);
       if (validationErrors.length > 0) {
@@ -140,6 +147,7 @@ class PostController {
       const inferred = metadata.inferMetadata(title, body);
       const slug = metadata.generateUniqueSlugFromList(allPosts, inferred.slug);
 
+      const createdAt = new Date().toISOString();
       const postData = {
         id: uuidv4(),
         title,
@@ -152,8 +160,9 @@ class PostController {
         reading_time: inferred.reading_time,
         status: status || "draft",
         tags: tags || [],
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: createdAt,
+        updated_at: createdAt,
+        published_at: published_at || createdAt,
       };
 
       await postsCollection.insert(postData);
@@ -180,7 +189,7 @@ class PostController {
         });
       }
 
-      const { title, body, tags, cover_image, status } = req.body;
+      const { title, body, tags, cover_image, status, published_at } = req.body;
 
       const validationErrors = validatePostInput(req.body, true);
       if (validationErrors.length > 0) {
@@ -221,6 +230,7 @@ class PostController {
           : post.reading_time,
         status: status || post.status || "draft",
         tags: tags !== undefined ? tags : post.tags,
+        published_at: published_at || post.published_at,
         updated_at: new Date().toISOString(),
       };
 

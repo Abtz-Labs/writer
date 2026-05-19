@@ -54,7 +54,7 @@
             <tr>
               <th>Title</th>
               <th>Status</th>
-              <th>Created</th>
+              <th>Published</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -68,7 +68,7 @@
                   <span class="post-status is-<%= post.status %>"><%= post.status %></span>
                 </td>
                 <td class="post-date-cell">
-                  <%= new Date(post.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
+                  <%= new Date(post.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %>
                 </td>
                 <td class="actions-cell">
                   <a href="/post/<%= post.slug %>" class="btn-view"><%= post.status === 'draft' ? 'Preview' : 'View' %></a>
@@ -128,12 +128,19 @@
             <textarea id="body" name="body"></textarea>
           </div>
         </div>
-        <div class="field">
-          <label class="label" for="status">Status</label>
-          <select id="status" name="status">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
+        <div class="field is-grouped">
+          <div class="field" style="flex: 1;">
+            <label class="label" for="status">Status</label>
+            <select id="status" name="status">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
+          <div class="field" style="flex: 1;">
+            <label class="label" for="published_at">Published at</label>
+            <input type="datetime-local" id="published_at" name="published_at">
+            <p class="help">Optional. Defaults to creation date if not set.</p>
+          </div>
         </div>
         <div class="form-actions">
           <button type="button" class="button is-outline" data-action="cancel-edit">Cancel</button>
@@ -160,6 +167,7 @@ function showCreateForm() {
   document.getElementById('cover_image').value = '';
   document.getElementById('body').value = '';
   document.getElementById('status').value = 'draft';
+  document.getElementById('published_at').value = '';
 }
 
 function editPost(slug) {
@@ -180,6 +188,17 @@ function editPost(slug) {
     document.getElementById('cover_image').value = post.cover_image || '';
     document.getElementById('body').value = post.body || '';
     document.getElementById('status').value = post.status || 'draft';
+    if (post.published_at) {
+      const date = new Date(post.published_at);
+      const localDatetime = date.getFullYear() + '-' + 
+        String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+        String(date.getDate()).padStart(2, '0') + 'T' + 
+        String(date.getHours()).padStart(2, '0') + ':' + 
+        String(date.getMinutes()).padStart(2, '0');
+      document.getElementById('published_at').value = localDatetime;
+    } else {
+      document.getElementById('published_at').value = '';
+    }
   })
   .catch(err => {
     showNotification('Failed to load post', 'danger');
@@ -291,11 +310,13 @@ document.addEventListener('click', (e) => {
 document.getElementById('postForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const slug = document.getElementById('postSlug').value;
+  const publishedAtValue = document.getElementById('published_at').value;
   const formData = {
     title: document.getElementById('title').value,
     cover_image: document.getElementById('cover_image').value,
     body: document.getElementById('body').value,
-    status: document.getElementById('status').value
+    status: document.getElementById('status').value,
+    published_at: publishedAtValue ? new Date(publishedAtValue).toISOString() : null
   };
 
   const method = slug ? 'PUT' : 'POST';

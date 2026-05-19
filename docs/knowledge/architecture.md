@@ -41,6 +41,14 @@ When a post is created (`POST /api/posts`) or updated:
    - **excerpt**: first 200 chars of plain text
 2. Post inserted into JSLiteDB `posts` collection.
 
+## Post Timestamps
+
+Each post has three timestamp fields:
+
+- **created_at**: Set automatically when the post is created. Cannot be modified.
+- **updated_at**: Set automatically when the post is created or updated.
+- **published_at**: Controls when the post appears published. Defaults to `created_at` if not provided. Can be set via API or UI to schedule future publication dates. Posts are sorted by `published_at` descending.
+
 ## Destructive Action Confirmation Flow
 
 Deleting a post or rotating the auth token requires a two-step confirmation:

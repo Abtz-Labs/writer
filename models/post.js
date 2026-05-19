@@ -64,6 +64,7 @@ class Post {
     this.tags = data.tags || [];
     this.created_at = data.created_at || new Date().toISOString();
     this.updated_at = data.updated_at || new Date().toISOString();
+    this.published_at = data.published_at || this.created_at;
   }
 
   static fromDB(obj) {
@@ -98,7 +99,8 @@ class Post {
       status: this.status,
       tags: this.tags,
       created_at: this.created_at,
-      updated_at: this.updated_at
+      updated_at: this.updated_at,
+      published_at: this.published_at
     };
   }
 

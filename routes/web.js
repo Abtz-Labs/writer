@@ -9,6 +9,10 @@ import { renderGistsInHtml } from "../services/gistRenderer.js";
 
 const router = express.Router();
 
+function getPublishDate(post) {
+  return post.published_at || post.created_at;
+}
+
 async function getSettings() {
   const settingsCollection = getCollection("settings");
   const settingsData = await settingsCollection.find({ id: "settings" });
@@ -164,7 +168,7 @@ router.get("/feed.xml", async (req, res, next) => {
     const publishedPosts = postsData
       .map((p) => Post.fromDB(p).toView())
       .filter((p) => p.status === "published")
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
     const lastBuildDate =
       publishedPosts.length > 0
@@ -176,7 +180,7 @@ router.get("/feed.xml", async (req, res, next) => {
     let itemsXml = "";
     for (const post of publishedPosts.slice(0, 20)) {
       const postUrl = `${baseUrl}/post/${post.slug}`;
-      const pubDate = new Date(post.created_at).toUTCString();
+      const pubDate = new Date(post.published_at).toUTCString();
       itemsXml += `
     <item>
       <title>${escapeXml(post.title)}</title>
@@ -229,7 +233,7 @@ router.get("/", async (req, res, next) => {
     const tags = Array.from(allTags).sort();
 
     let filteredPosts = publishedPosts.sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at),
+      (a, b) => new Date(b.published_at) - new Date(a.published_at),
     );
 
     if (tag) {
@@ -279,7 +283,8 @@ router.get("/search", async (req, res, next) => {
     });
     const tags = Array.from(allTags).sort();
 
-    const results = searchPosts(publishedPosts, q);
+    const results = searchPosts(publishedPosts, q)
+      .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
     const totalPosts = results.length;
     const totalPages = Math.ceil(totalPosts / limit);
@@ -329,7 +334,7 @@ router.get("/post/:slug", async (req, res, next) => {
     const sortedPosts = allPosts
       .map((p) => Post.fromDB(p).toView())
       .filter((p) => p.status === "published")
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
     const currentIndex = sortedPosts.findIndex((p) => p.slug === post.slug);
     const prevPost = currentIndex > 0 ? sortedPosts[currentIndex - 1] : null;
@@ -570,9 +575,13 @@ router.get("/panel", requireWebAuth, async (req, res, next) => {
       return post;
     });
 
-    let filteredPosts = allPosts;
+    let filteredPosts = allPosts.sort(
+      (a, b) => new Date(b.published_at) - new Date(a.published_at),
+    );
     if (q && q.trim()) {
-      filteredPosts = searchPosts(allPosts, q);
+      filteredPosts = searchPosts(allPosts, q).sort(
+        (a, b) => new Date(b.published_at) - new Date(a.published_at),
+      );
     }
 
     const totalPosts = filteredPosts.length;
