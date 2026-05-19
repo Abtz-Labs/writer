@@ -6,6 +6,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 
 | Theme | File | Description |
 | ----- | ---- |-------------|
+| Checkpoints | [docs/knowledge/checkpoints.md](docs/knowledge/checkpoints.md) | Persistent memory for cross-session continuity |
 | Overview | [docs/knowledge/overview.md](docs/knowledge/overview.md) | Project overview and setup |
 | Architecture | [docs/knowledge/architecture.md](docs/knowledge/architecture.md) | Request flow, authentication, security, data layer, rendering |
 | Commands | [docs/knowledge/commands.md](docs/knowledge/commands.md) | Available npm scripts and CLI commands |
