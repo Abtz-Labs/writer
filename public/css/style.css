@@ -653,7 +653,19 @@ main {
 }
 
 .content li {
-    margin-bottom: 0.5rem;
+    margin-bottom: 0;
+}
+
+.content li > *:first-child {
+    margin-top: 0;
+}
+
+.content li > *:last-child {
+    margin-bottom: 0;
+}
+
+.content li p {
+    margin: 0;
 }
 
 .content hr {
@@ -842,42 +854,118 @@ main {
     margin-bottom: var(--spacing-sm);
 }
 
-.field .markdown-editor {
+/* ============================================
+   Tiptap Editor
+   ============================================ */
+
+.tiptap-editor {
     border: 1px solid var(--color-border);
     border-radius: 4px;
     overflow: hidden;
 }
 
-.field .markdown-toolbar {
-    display: flex;
-    gap: 2px;
-    padding: var(--spacing-sm);
-    background: var(--color-bg-secondary);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.field .markdown-toolbar button {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: 1px solid var(--color-border);
-    border-radius: 3px;
-    background: var(--color-bg);
-    cursor: pointer;
-    font-size: 0.8rem;
+.tiptap-editor .tiptap-content {
+    min-height: 300px;
+    padding: 0.75rem;
+    outline: none;
     font-family: var(--font-body);
-    min-width: 28px;
-    transition: all 0.15s;
+    font-size: 1rem;
+    line-height: 1.6;
 }
 
-.field .markdown-toolbar button:hover {
-    background: var(--color-text);
-    color: var(--color-bg);
-    border-color: var(--color-text);
+.tiptap-editor .tiptap-content p {
+    margin-bottom: 0.75rem;
 }
 
-.field .markdown-editor textarea {
+.tiptap-editor .tiptap-content h1 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+}
+
+.tiptap-editor .tiptap-content h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1.25rem 0 0.5rem;
+}
+
+.tiptap-editor .tiptap-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1rem 0 0.5rem;
+}
+
+.tiptap-editor .tiptap-content ul,
+.tiptap-editor .tiptap-content ol {
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.tiptap-editor .tiptap-content li {
+    margin-bottom: 0.25rem;
+}
+
+.tiptap-editor .tiptap-content blockquote {
+    border-left: 3px solid var(--color-text);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    color: var(--color-text-light);
+}
+
+.tiptap-editor .tiptap-content pre {
+    background: var(--color-bg-secondary);
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    border: 1px solid var(--color-border);
+}
+
+.tiptap-editor .tiptap-content code {
+    font-family: var(--font-mono);
+    background: var(--color-bg-secondary);
+    padding: 0.15rem 0.35rem;
+    border-radius: 3px;
+    font-size: 0.88em;
+    color: var(--color-text-red);
+}
+
+.tiptap-editor .tiptap-content pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+.tiptap-editor .tiptap-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+    margin: 1rem 0;
+}
+
+.tiptap-editor .tiptap-content a {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
+.tiptap-editor .tiptap-content hr {
     border: none;
-    border-radius: 0;
-    min-height: 250px;
+    border-top: 1px solid var(--color-border);
+    margin: 1.5rem 0;
+}
+
+.tiptap-editor .tiptap-content p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    float: left;
+    color: var(--color-text-light);
+    pointer-events: none;
+    height: 0;
 }
 
 .field input,

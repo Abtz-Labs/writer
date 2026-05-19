@@ -111,22 +111,12 @@
           <p class="help">Optional. Provide an external image URL or leave blank to auto-detect from body.</p>
         </div>
         <div class="field">
-          <label class="label" for="body">Content</label>
-          <div class="markdown-editor">
-            <div class="markdown-toolbar">
-              <button type="button" data-md-before="**" data-md-after="**" title="Bold"><b>B</b></button>
-              <button type="button" data-md-before="*" data-md-after="*" title="Italic"><i>I</i></button>
-              <button type="button" data-md-before="# " data-md-after="" title="Heading">H</button>
-              <button type="button" data-md-before="[" data-md-after="](url)" title="Link">Link</button>
-              <button type="button" data-action="insert-image" title="Image">Img</button>
-              <button type="button" data-md-before="`" data-md-after="`" title="Code">Code</button>
-              <button type="button" data-md-before="```\n" data-md-after="\n```" title="Code Block">```</button>
-              <button type="button" data-md-before="- " data-md-after="" title="List">List</button>
-              <button type="button" data-action="insert-table" title="Table">Table</button>
-              <button type="button" data-md-before="> " data-md-after="" title="Quote">Quote</button>
-            </div>
-            <textarea id="body" name="body"></textarea>
+          <label class="label">Content</label>
+          <div class="tiptap-editor">
+            <div id="tiptap-editor"></div>
           </div>
+          <p class="help">Supports Markdown syntax.</p>
+          <input type="hidden" id="body" name="body" value="">
         </div>
         <div class="field is-grouped">
           <div class="field" style="flex: 1;">
@@ -152,10 +142,51 @@
 </div>
 <% } %>
 
-<script>
-const authToken = <%- JSON.stringify(token) %>;
+<script type="module">
+import { Editor } from 'https://esm.sh/@tiptap/core@2.11.7';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.11.7';
+import Link from 'https://esm.sh/@tiptap/extension-link@2.11.7';
+import Image from 'https://esm.sh/@tiptap/extension-image@2.11.7';
+import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.11.7';
+import TurndownService from 'https://esm.sh/turndown@7.2.4';
 
-function showCreateForm() {
+const authToken = <%- JSON.stringify(token) %>;
+const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+
+turndown.addRule('strikethrough', {
+  filter: ['del', 's', 'strike'],
+  replacement: (content) => '~~' + content + '~~'
+});
+
+turndown.addRule('listItemParagraph', {
+  filter: (node) => node.nodeName === 'P' && node.parentNode.nodeName === 'LI',
+  replacement: (content, node) => node.textContent + '\n'
+});
+
+let editor = null;
+
+function initEditor(content = '') {
+  if (editor) {
+    editor.destroy();
+    document.getElementById('tiptap-editor').innerHTML = '';
+  }
+  editor = new Editor({
+    element: document.getElementById('tiptap-editor'),
+    extensions: [
+      StarterKit,
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: 'editor-link' } }),
+      Image.configure({ HTMLAttributes: { class: 'editor-image' } }),
+      Placeholder.configure({ placeholder: 'Write your post content...' })
+    ],
+    content: content,
+    editorProps: {
+      attributes: { class: 'tiptap-content' }
+    }
+  });
+  return editor;
+}
+
+window.showCreateForm = function() {
   document.querySelector('.post-list').style.display = 'none';
   const pagination = document.getElementById('pagination');
   if (pagination) pagination.style.display = 'none';
@@ -168,9 +199,10 @@ function showCreateForm() {
   document.getElementById('body').value = '';
   document.getElementById('status').value = 'draft';
   document.getElementById('published_at').value = '';
-}
+  initEditor('');
+};
 
-function editPost(slug) {
+window.editPost = function(slug) {
   fetch('/api/posts/' + slug, {
     credentials: 'same-origin',
     headers: { 'X-Auth-Token': authToken }
@@ -186,58 +218,34 @@ function editPost(slug) {
     document.getElementById('postSlug').value = slug;
     document.getElementById('title').value = post.title;
     document.getElementById('cover_image').value = post.cover_image || '';
-    document.getElementById('body').value = post.body || '';
     document.getElementById('status').value = post.status || 'draft';
     if (post.published_at) {
       const date = new Date(post.published_at);
-      const localDatetime = date.getFullYear() + '-' + 
-        String(date.getMonth() + 1).padStart(2, '0') + '-' + 
-        String(date.getDate()).padStart(2, '0') + 'T' + 
-        String(date.getHours()).padStart(2, '0') + ':' + 
+      const localDatetime = date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0') + 'T' +
+        String(date.getHours()).padStart(2, '0') + ':' +
         String(date.getMinutes()).padStart(2, '0');
       document.getElementById('published_at').value = localDatetime;
     } else {
       document.getElementById('published_at').value = '';
     }
+    initEditor(post.bodyHtml || '<p></p>');
   })
   .catch(err => {
-    showNotification('Failed to load post', 'danger');
+    window.showNotification('Failed to load post', 'danger');
   });
-}
+};
 
-function cancelEdit() {
+window.cancelEdit = function() {
   document.querySelector('.post-list').style.display = 'block';
   const pagination = document.getElementById('pagination');
   if (pagination) pagination.style.display = '';
   document.getElementById('editForm').style.display = 'none';
-}
+  if (editor) { editor.destroy(); editor = null; }
+};
 
-function insertMarkdown(before, after) {
-  const textarea = document.getElementById('body');
-  const start = textarea.selectionStart;
-  const end = textarea.selectionEnd;
-  const text = textarea.value;
-  const selected = text.substring(start, end);
-  const replacement = selected ? before + selected + after : before + after;
-  textarea.value = text.substring(0, start) + replacement + text.substring(end);
-  textarea.focus();
-  const cursorPos = selected ? start + replacement.length : start + before.length;
-  textarea.setSelectionRange(cursorPos, cursorPos);
-}
-
-function insertImage() {
-  const url = prompt('Enter image URL:', 'https://');
-  if (!url) return;
-  const alt = prompt('Enter alt text:', 'image description');
-  insertMarkdown('![', alt ? `${alt}](${url})` : `](${url})`);
-}
-
-function insertTable() {
-  const insert = '\n| Header 1 | Header 2 | Header 3 |\n|----------|----------|----------|\n| Cell 1   | Cell 2   | Cell 3   |\n';
-  insertMarkdown(insert, '');
-}
-
-function deletePost(slug) {
+window.deletePost = function(slug) {
   fetch('/api/posts/' + slug, {
     method: 'DELETE',
     headers: { 'X-Auth-Token': authToken }
@@ -257,18 +265,18 @@ function deletePost(slug) {
       sessionStorage.setItem('panelFlash', JSON.stringify({ message: 'Post deleted successfully', type: 'success' }));
       window.location.reload();
     } else if (data.error) {
-      showNotification(data.message, 'danger');
+      window.showNotification(data.message, 'danger');
     }
   })
   .catch(err => {
-    showNotification('Failed to delete post', 'danger');
+    window.showNotification('Failed to delete post', 'danger');
   });
-}
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const editSlug = params.get('slug');
-  if (editSlug) editPost(editSlug);
+  if (editSlug) window.editPost(editSlug);
 });
 
 document.addEventListener('click', (e) => {
@@ -279,42 +287,34 @@ document.addEventListener('click', (e) => {
 
   if (action === 'create-post') {
     e.preventDefault();
-    showCreateForm();
+    window.showCreateForm();
   } else if (action === 'edit-post') {
     e.preventDefault();
-    editPost(slug);
+    window.editPost(slug);
   } else if (action === 'delete-post') {
     e.preventDefault();
-    showConfirmModal({
+    window.showConfirmModal({
       title: 'Delete Post',
       message: 'Are you sure you want to delete this post? This action cannot be undone.',
       confirmText: 'Delete',
       confirmClass: 'is-danger',
-      onConfirm: () => deletePost(slug)
+      onConfirm: () => window.deletePost(slug)
     });
   } else if (action === 'cancel-edit') {
     cancelEdit();
-  } else if (action === 'insert-image') {
-    insertImage();
-  } else if (action === 'insert-table') {
-    insertTable();
   }
-});
-
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('button[data-md-before]');
-  if (!btn) return;
-  insertMarkdown(btn.dataset.mdBefore, btn.dataset.mdAfter || '');
 });
 
 document.getElementById('postForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (!editor) return;
   const slug = document.getElementById('postSlug').value;
   const publishedAtValue = document.getElementById('published_at').value;
+  const markdownBody = turndown.turndown(editor.getHTML());
   const formData = {
     title: document.getElementById('title').value,
     cover_image: document.getElementById('cover_image').value,
-    body: document.getElementById('body').value,
+    body: markdownBody,
     status: document.getElementById('status').value,
     published_at: publishedAtValue ? new Date(publishedAtValue).toISOString() : null
   };
@@ -338,10 +338,10 @@ document.getElementById('postForm').addEventListener('submit', async (e) => {
       sessionStorage.setItem('panelFlash', JSON.stringify({ message: msg, type: 'success' }));
       window.location.reload();
     } else if (data.error) {
-      showNotification(data.message, 'danger');
+      window.showNotification(data.message, 'danger');
     }
   } catch (err) {
-    showNotification('Failed to save post', 'danger');
+    window.showNotification('Failed to save post', 'danger');
   }
 });
 </script>

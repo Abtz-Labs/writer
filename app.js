@@ -78,8 +78,8 @@ app.use(async (req, res, next) => {
     }
   };
 
-  const scriptSrc = ["'self'", "'unsafe-inline'", ...extraScriptDomains];
-  const connectSrc = ["'self'", ...extraScriptDomains.map(getOrigin)];
+  const scriptSrc = ["'self'", "'unsafe-inline'", "https://esm.sh", ...extraScriptDomains];
+  const connectSrc = ["'self'", "https://esm.sh", ...extraScriptDomains.map(getOrigin)];
 
   helmet({
     crossOriginEmbedderPolicy: false,
