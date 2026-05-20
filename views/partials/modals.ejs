@@ -1,0 +1,140 @@
+<div id="confirmModal" class="modal" style="display: none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <h3 id="modalTitle">Confirm</h3>
+        <p id="modalMessage">Are you sure?</p>
+        <div class="modal-actions">
+            <button type="button" class="button is-outline" id="modalCancel">Cancel</button>
+            <button type="button" class="button is-danger" id="modalConfirm">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<div id="imageEditModal" class="modal" style="display: none">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+        <h3>Edit Image</h3>
+        <form id="imageEditForm">
+            <div class="field">
+                <label class="label" for="imgSrc">URL</label>
+                <input type="url" id="imgSrc" name="src" required>
+            </div>
+            <div class="field">
+                <label class="label" for="imgAlt">Alt Text</label>
+                <input type="text" id="imgAlt" name="alt">
+            </div>
+            <div class="field">
+                <label class="label" for="imgTitle">Title</label>
+                <input type="text" id="imgTitle" name="title">
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="button is-outline" id="imgModalCancel">Cancel</button>
+                <button type="submit" class="button is-primary">Update</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function () {
+    const modal = document.getElementById("confirmModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalMessage = document.getElementById("modalMessage");
+    const modalConfirmBtn = document.getElementById("modalConfirm");
+    const modalCancelBtn = document.getElementById("modalCancel");
+    let modalConfirmCallback = null;
+
+    window.showConfirmModal = function ({
+        title = "Confirm",
+        message = "Are you sure?",
+        confirmText = "Confirm",
+        confirmClass = "is-danger",
+        onConfirm,
+    }) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modalConfirmBtn.textContent = confirmText;
+        modalConfirmBtn.className = "button " + confirmClass;
+        modalConfirmCallback = onConfirm;
+        modal.style.display = "flex";
+    };
+
+    function hideModal() {
+        modal.style.display = "none";
+        modalConfirmCallback = null;
+    }
+
+    const imageModal = document.getElementById("imageEditModal");
+    const imgSrcInput = document.getElementById("imgSrc");
+    const imgAltInput = document.getElementById("imgAlt");
+    const imgTitleInput = document.getElementById("imgTitle");
+    const imgForm = document.getElementById("imageEditForm");
+    let imageEditCallback = null;
+
+    window.showImageEditModal = function ({ src = "", alt = "", title = "", onUpdate }) {
+        imgSrcInput.value = src;
+        imgAltInput.value = alt;
+        imgTitleInput.value = title;
+        imageEditCallback = onUpdate;
+        imageModal.style.display = "flex";
+        imgSrcInput.focus();
+    };
+
+    function hideImageModal() {
+        imageModal.style.display = "none";
+        imageEditCallback = null;
+    }
+
+    document.getElementById("imgModalCancel").addEventListener("click", hideImageModal);
+    imageModal.querySelector(".modal-backdrop").addEventListener("click", hideImageModal);
+    imgForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (imageEditCallback) {
+            imageEditCallback({
+                src: imgSrcInput.value,
+                alt: imgAltInput.value,
+                title: imgTitleInput.value
+            });
+        }
+        hideImageModal();
+    });
+
+    modalConfirmBtn.addEventListener("click", function () {
+        if (modalConfirmCallback) modalConfirmCallback();
+        hideModal();
+    });
+
+    modalCancelBtn.addEventListener("click", hideModal);
+    modal.querySelector(".modal-backdrop").addEventListener("click", hideModal);
+
+    window.showNotification = function (message, type) {
+        const container = document.querySelector(".panel-content .notification-container");
+        if (!container) return;
+        const el = document.createElement("div");
+        el.className = "notification is-" + (type || "success");
+        el.textContent = message;
+        container.appendChild(el);
+        setTimeout(function () {
+            el.style.opacity = "0";
+            el.style.transition = "opacity 0.3s";
+            setTimeout(function () {
+                el.remove();
+            }, 300);
+        }, 4000);
+    };
+
+    (function () {
+        const flash = sessionStorage.getItem("panelFlash");
+        if (flash) {
+            try {
+                const data = JSON.parse(flash);
+                const container = document.querySelector(".panel-content .notification-container");
+                if (container) {
+                    showNotification(data.message, data.type);
+                }
+            } catch (e) {}
+            sessionStorage.removeItem("panelFlash");
+        }
+    })();
+})();
+</script>

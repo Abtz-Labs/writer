@@ -245,6 +245,22 @@ window.cancelEdit = function() {
   if (editor) { editor.destroy(); editor = null; }
 };
 
+window.editImage = function(img) {
+  const src = img.src || '';
+  const alt = img.alt || '';
+  const title = img.title || '';
+  const pos = editor.view.posAtDOM(img, 0);
+  editor.chain().setNodeSelection(pos).focus();
+  window.showImageEditModal({
+    src: src,
+    alt: alt,
+    title: title,
+    onUpdate: function(attrs) {
+      editor.chain().updateAttributes('image', attrs).focus().run();
+    }
+  });
+};
+
 window.deletePost = function(slug) {
   fetch('/api/posts/' + slug, {
     method: 'DELETE',
@@ -277,6 +293,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const params = new URLSearchParams(window.location.search);
   const editSlug = params.get('slug');
   if (editSlug) window.editPost(editSlug);
+});
+
+document.getElementById('tiptap-editor')?.addEventListener('click', (e) => {
+  const img = e.target.closest('img');
+  if (!img) return;
+  e.preventDefault();
+  window.editImage(img);
 });
 
 document.addEventListener('click', (e) => {
