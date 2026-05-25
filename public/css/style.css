@@ -131,17 +131,29 @@ main {
 .reading-progress-bar {
     height: 100%;
     width: 0%;
-    background: var(--color-accent);
+    background: linear-gradient(to left, #0fd9de, #895bfe);
     transition: width 50ms linear;
+    position: relative;
+    z-index: 1;
 }
 
-.reading-progress-bar.pulse {
+.reading-progress-bar.pulse::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(to left, #895bfe, #0fd9de);
+    border-radius: 4px;
+    z-index: -1;
+    opacity: 0;
     animation: progress-pulse 600ms ease-out;
 }
 
 @keyframes progress-pulse {
-    0% { box-shadow: 0 0 0 0 var(--color-accent); }
-    100% { box-shadow: 0 0 12px 6px transparent; }
+    0% { opacity: 0.5; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
 }
 
 /* ============================================
@@ -1470,8 +1482,6 @@ main {
     background: var(--color-bg);
     border: 1px solid var(--color-border);
     border-radius: 4px;
-    overflow: hidden;
-    overflow-x: auto;
 }
 
 .empty-list {
@@ -1483,8 +1493,6 @@ main {
 .posts-table {
     width: 100%;
     border-collapse: collapse;
-    display: block;
-    overflow-x: auto;
 }
 
 .posts-table th,
@@ -1501,6 +1509,9 @@ main {
     letter-spacing: 0.05em;
     color: var(--color-text-light);
     background: var(--color-bg-secondary);
+    position: sticky;
+    top: 77px;
+    z-index: 1;
 }
 
 .posts-table tr:last-child td {
@@ -1525,8 +1536,10 @@ main {
     font-size: 0.85rem;
 }
 
-.actions-cell {
+.posts-table th.actions-cell,
+.posts-table td.actions-cell {
     white-space: nowrap;
+    text-align: right;
 }
 
 .btn-view,
