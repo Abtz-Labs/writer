@@ -268,7 +268,6 @@
 ├── package.json
 ├── .dockerignore
 ├── README.md
-├── SPEC.md
 ├── CLAUDE.md
 ├── AGENTS.md
 ├── app.js

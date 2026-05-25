@@ -6,6 +6,7 @@ This file provides guidance to AI Agents when working with code in this reposito
 
 | Theme | File | Description |
 | ----- | ---- |-------------|
+| Specification | [docs/SPEC.md](docs/SPEC.md) | Full project spec: design, data models, API, acceptance criteria |
 | Checkpoints | [docs/knowledge/checkpoints.md](docs/knowledge/checkpoints.md) | Persistent memory for cross-session continuity |
 | Overview | [docs/knowledge/overview.md](docs/knowledge/overview.md) | Project overview and setup |
 | Architecture | [docs/knowledge/architecture.md](docs/knowledge/architecture.md) | Request flow, authentication, security, data layer, rendering |
