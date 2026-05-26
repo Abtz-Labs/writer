@@ -18,10 +18,12 @@ function errorHandler(err, req, res, next) {
     });
   }
 
-  res.status(500).json({
-    error: "Internal Server Error",
+  const status = err.status || err.statusCode || 500;
+
+  res.status(status).json({
+    error: status === 500 ? "Internal Server Error" : err.name || "Error",
     message:
-      process.env.NODE_ENV === "development"
+      process.env.NODE_ENV === "development" || status !== 500
         ? err.message
         : "Something went wrong",
   });

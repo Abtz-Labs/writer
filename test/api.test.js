@@ -127,3 +127,86 @@ describe("API Destructive Actions Confirmation Flow", () => {
     expect(res.status).toBe(410);
   });
 });
+
+describe("API Post Validation", () => {
+  let authToken;
+
+  beforeAll(async () => {
+    const settingsCollection = getCollection("settings");
+    const settingsData = await settingsCollection.find({ id: "settings" });
+    const settingsObj =
+      settingsData && settingsData.length > 0 ? settingsData[0] : null;
+    authToken = settingsObj ? settingsObj.auth_token : "";
+  });
+
+  test("POST /api/posts rejects non-string body", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .set("X-Auth-Token", authToken)
+      .send({ title: "Test", body: true });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain("Body is required");
+  });
+
+  test("PUT /api/posts/:slug rejects non-string body", async () => {
+    const createRes = await request(app)
+      .post("/api/posts")
+      .set("X-Auth-Token", authToken)
+      .send({ title: "Update Test", body: "Original body" });
+
+    const slug = createRes.body.slug;
+
+    const res = await request(app)
+      .put("/api/posts/" + slug)
+      .set("X-Auth-Token", authToken)
+      .send({ body: [] });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain("Body must be a string");
+  });
+
+  test("PUT /api/posts/:slug rejects non-string title", async () => {
+    const createRes = await request(app)
+      .post("/api/posts")
+      .set("X-Auth-Token", authToken)
+      .send({ title: "Title Test", body: "Original body" });
+
+    const slug = createRes.body.slug;
+
+    const res = await request(app)
+      .put("/api/posts/" + slug)
+      .set("X-Auth-Token", authToken)
+      .send({ title: {} });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toContain("Title must be a string");
+  });
+
+  test("POST /api/posts returns 400 for malformed JSON", async () => {
+    const res = await request(app)
+      .post("/api/posts")
+      .set("X-Auth-Token", authToken)
+      .set("Content-Type", "application/json")
+      .send("not valid json");
+
+    expect(res.status).toBe(400);
+  });
+
+  test("PUT /api/posts/:slug preserves body when omitted", async () => {
+    const createRes = await request(app)
+      .post("/api/posts")
+      .set("X-Auth-Token", authToken)
+      .send({ title: "Preserve Test", body: "Original body" });
+
+    const slug = createRes.body.slug;
+
+    const res = await request(app)
+      .put("/api/posts/" + slug)
+      .set("X-Auth-Token", authToken)
+      .send({ title: "Updated Title" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.body).toBe("Original body");
+  });
+});

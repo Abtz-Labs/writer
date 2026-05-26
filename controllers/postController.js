@@ -29,6 +29,9 @@ function validatePostInput(data, isUpdate = false) {
     ) {
       errors.push("Title is required and must be a non-empty string");
     }
+    if (title !== undefined && typeof title !== "string") {
+      errors.push("Title must be a string");
+    }
     if (title && title.length > 200) {
       errors.push("Title must not exceed 200 characters");
     }
@@ -40,6 +43,9 @@ function validatePostInput(data, isUpdate = false) {
       (!body || typeof body !== "string" || body.trim().length === 0)
     ) {
       errors.push("Body is required and must be a non-empty string");
+    }
+    if (body !== undefined && typeof body !== "string") {
+      errors.push("Body must be a string");
     }
     if (body && body.length > 50000) {
       errors.push("Body must not exceed 50000 characters");
@@ -199,10 +205,10 @@ class PostController {
         });
       }
 
-      let processedBody = body || post.body;
+      let processedBody = typeof body === "string" ? body : post.body;
       let newSlug = post.slug;
 
-      if (body && title && title !== post.title) {
+      if (typeof body === "string" && title && title !== post.title) {
         const inferred = metadata.inferMetadata(title, processedBody);
         newSlug = metadata.generateUniqueSlugFromList(
           allPosts,
