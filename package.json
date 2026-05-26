@@ -6,8 +6,8 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon app.js -p 8080",
-    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage",
-    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest",
     "deploy": "bare deploy"
   },
   "keywords": [
@@ -39,8 +39,9 @@
     "xss": "1.0.15"
   },
   "devDependencies": {
-    "jest": "29.7.0",
+    "@vitest/coverage-v8": "3.2.0",
     "nodemon": "3.1.14",
-    "supertest": "6.3.4"
+    "supertest": "6.3.4",
+    "vitest": "3.2.0"
   }
 }

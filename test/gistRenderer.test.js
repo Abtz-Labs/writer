@@ -1,8 +1,8 @@
-import { jest } from '@jest/globals';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
-const mockHttpsGet = jest.fn();
+const mockHttpsGet = vi.fn();
 
-jest.unstable_mockModule('node:https', () => ({
+vi.mock('node:https', () => ({
   default: { get: mockHttpsGet },
   get: mockHttpsGet
 }));
@@ -11,7 +11,7 @@ const { renderGistsInHtml } = await import('../services/gistRenderer.js');
 
 describe('Gist Renderer', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('returns html unchanged when no gist scripts present', async () => {
@@ -34,8 +34,8 @@ describe('Gist Renderer', () => {
 
     const mockResponse = {
       statusCode: 200,
-      setEncoding: jest.fn(),
-      on: jest.fn((event, callback) => {
+      setEncoding: vi.fn(),
+      on: vi.fn((event, callback) => {
         if (event === 'data') {
           callback(JSON.stringify(mockGistData));
         } else if (event === 'end') {
@@ -46,7 +46,7 @@ describe('Gist Renderer', () => {
 
     mockHttpsGet.mockImplementation((url, options, callback) => {
       callback(mockResponse);
-      return { on: jest.fn(), on: jest.fn() };
+      return { on: vi.fn() };
     });
 
     const html = '<script src="https://gist.github.com/user/abc123.js"></script>';
@@ -64,8 +64,8 @@ describe('Gist Renderer', () => {
   test('shows fallback on gist fetch failure', async () => {
     const mockResponse = {
       statusCode: 404,
-      setEncoding: jest.fn(),
-      on: jest.fn((event, callback) => {
+      setEncoding: vi.fn(),
+      on: vi.fn((event, callback) => {
         if (event === 'data') {
           callback('Not Found');
         } else if (event === 'end') {
@@ -76,7 +76,7 @@ describe('Gist Renderer', () => {
 
     mockHttpsGet.mockImplementation((url, options, callback) => {
       callback(mockResponse);
-      return { on: jest.fn(), on: jest.fn() };
+      return { on: vi.fn() };
     });
 
     const html = '<script src="https://gist.github.com/user/deadbeef.js"></script>';
