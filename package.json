@@ -1,6 +1,6 @@
 {
   "name": "serif-blog",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "A simple, single-tenant blog web application with RESTful API",
   "type": "module",
   "main": "app.js",
