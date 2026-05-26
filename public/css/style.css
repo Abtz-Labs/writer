@@ -711,6 +711,64 @@ main {
     margin: 2.5rem 0;
 }
 
+/* ============================================
+   Markdown Tables (Bulma-inspired)
+   ============================================ */
+
+.content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    overflow: hidden;
+    font-size: 0.95em;
+}
+
+.content table thead {
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--color-border);
+}
+
+.content table thead th {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--color-text);
+    border-bottom: 2px solid var(--color-border);
+    vertical-align: bottom;
+}
+
+.content table tbody tr {
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.15s ease;
+}
+
+.content table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.content table tbody tr:hover {
+    background: var(--color-bg-secondary);
+}
+
+.content table tbody td {
+    padding: 0.75rem 1rem;
+    vertical-align: top;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.content table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.content table tbody td strong,
+.content table tbody td b {
+    color: var(--color-text);
+}
+
 /* Gist embed styling */
 .gist-embed {
     margin: 1.75rem 0;
