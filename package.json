@@ -1,6 +1,6 @@
 {
   "name": "serif-blog",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A simple, single-tenant blog web application with RESTful API",
   "type": "module",
   "main": "app.js",
@@ -35,7 +35,6 @@
     "jslitedb": "1.0.3",
     "marked": "18.0.4",
     "turndown": "7.2.4",
-    "uuid": "14.0.0",
     "xss": "1.0.15"
   },
   "devDependencies": {

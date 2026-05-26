@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import crypto from 'node:crypto';
 import { marked } from 'marked';
 import xss from 'xss';
 
@@ -51,7 +51,7 @@ const sanitizeHtml = new xss.FilterXSS(xssOptions);
 
 class Post {
   constructor(data) {
-    this.id = data.id || uuidv4();
+    this.id = data.id || crypto.randomUUID();
     this.title = data.title;
     this.slug = data.slug;
     this.body = data.body;

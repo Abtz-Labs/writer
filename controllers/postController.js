@@ -11,7 +11,7 @@ import { renderGistsInHtml } from "../services/gistRenderer.js";
 
 import logger from "../utils/logger.js";
 
-import { v4 as uuidv4 } from "uuid";
+import crypto from "node:crypto";
 
 marked.setOptions({
   breaks: true,
@@ -155,7 +155,7 @@ class PostController {
 
       const createdAt = new Date().toISOString();
       const postData = {
-        id: uuidv4(),
+        id: crypto.randomUUID(),
         title,
         slug,
         body,

@@ -5,7 +5,8 @@ Persistent memory for cross-session continuity. Updated as work progresses.
 ## Current Status
 
 - **published_at field**: Implemented and working. Posts sort by `published_at` desc everywhere.
-- **Tests**: 42 passing.
+- **Tests**: 47 passing.
+- **uuid dependency removed**: Replaced `uuid` package with Node.js built-in `crypto.randomUUID()` to fix `ReferenceError: crypto is not defined` on Node.js 18 in ESM mode.
 - **Panel UI**: Published column + datetime-local input for editing published_at.
 - **Tiptap editor**: Rich text editor in panel via CDN (esm.sh). No toolbar — uses Markdown input rules (e.g. `**bold**`, `# heading`). "Supports Markdown syntax." help text below editor.
 
