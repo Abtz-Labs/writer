@@ -148,10 +148,16 @@ import StarterKit from 'https://esm.sh/@tiptap/starter-kit@2.11.7';
 import Link from 'https://esm.sh/@tiptap/extension-link@2.11.7';
 import Image from 'https://esm.sh/@tiptap/extension-image@2.11.7';
 import Placeholder from 'https://esm.sh/@tiptap/extension-placeholder@2.11.7';
+import Table from 'https://esm.sh/@tiptap/extension-table@2.11.7';
+import TableRow from 'https://esm.sh/@tiptap/extension-table-row@2.11.7';
+import TableCell from 'https://esm.sh/@tiptap/extension-table-cell@2.11.7';
+import TableHeader from 'https://esm.sh/@tiptap/extension-table-header@2.11.7';
 import TurndownService from 'https://esm.sh/turndown@7.2.4';
+import { gfm } from 'https://esm.sh/turndown-plugin-gfm@1.0.2';
 
 const authToken = <%- JSON.stringify(token) %>;
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' });
+turndown.use(gfm);
 
 turndown.addRule('strikethrough', {
   filter: ['del', 's', 'strike'],
@@ -176,7 +182,11 @@ function initEditor(content = '') {
       StarterKit,
       Link.configure({ openOnClick: false, HTMLAttributes: { class: 'editor-link' } }),
       Image.configure({ HTMLAttributes: { class: 'editor-image' } }),
-      Placeholder.configure({ placeholder: 'Write your post content...' })
+      Placeholder.configure({ placeholder: 'Write your post content...' }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableHeader,
+      TableCell
     ],
     content: content,
     editorProps: {

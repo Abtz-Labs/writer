@@ -1058,6 +1058,29 @@ main {
     margin: 1.5rem 0;
 }
 
+.tiptap-editor .tiptap-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+}
+
+.tiptap-editor .tiptap-content th,
+.tiptap-editor .tiptap-content td {
+    border: 1px solid var(--color-border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+}
+
+.tiptap-editor .tiptap-content th {
+    background: var(--color-bg-secondary);
+    font-weight: 600;
+}
+
+.tiptap-editor .tiptap-content tr:nth-child(even) {
+    background: var(--color-bg-secondary);
+}
+
 .tiptap-editor .tiptap-content p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
     float: left;
