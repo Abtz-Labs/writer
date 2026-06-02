@@ -20,6 +20,7 @@ class SettingsController {
       const settings = Settings.fromDB(settingsObj);
       const json = settings.toJSON();
       delete json.auth_token;
+      delete json.username;
       res.json(json);
     } catch (err) {
       next(err);

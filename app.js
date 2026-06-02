@@ -84,6 +84,9 @@ app.use(async (req, res, next) => {
   helmet({
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    xContentTypeOptions: true,
+    xFrameOptions: { action: "deny" },
+    hsts: { maxAge: 31536000, includeSubDomains: true },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
