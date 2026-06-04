@@ -106,6 +106,7 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  validate: { xForwardedForHeader: false },
   message: {
     error: "Too many requests",
     message: "Too many login attempts. Please try again later.",
@@ -143,6 +144,7 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX, 10) || 100,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { xForwardedForHeader: false },
   message: { error: "Too many requests", message: "Please slow down" },
   skip: (req) => {
     if (req.session?.authToken) return true;
