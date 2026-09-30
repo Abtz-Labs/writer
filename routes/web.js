@@ -251,7 +251,7 @@ router.get("/", async (req, res, next) => {
       posts,
       settings,
       tags,
-      activeTag: tag || null,
+      activeTag: tag || "",
       currentPage: pageNum,
       totalPages,
       prevPage: pageNum > 1 ? pageNum - 1 : null,

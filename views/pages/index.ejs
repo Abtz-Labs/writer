@@ -111,26 +111,7 @@
                     </form>
                 </div>
 
-                <div class="topics-box">
-                    <h3 class="sidebar-title">Topics</h3>
-                    <div class="tag-list">
-                        <a
-                            href="/"
-                            class="tag<%= !activeTag ? ' is-active' : '' %>"
-                            data-filter=""
-                            >All</a
-                        >
-                        <% tags.forEach(function(tag) { %>
-                        <a
-                            href="/?tag=<%= encodeURIComponent(tag) %>"
-                            class="tag<%= activeTag === tag ? ' is-active' : '' %>"
-                            data-filter="<%= tag %>"
-                            ><%= tag.charAt(0).toUpperCase() + tag.slice(1)
-                            %></a
-                        >
-                        <% }); %>
-                    </div>
-                </div>
+                <%- include("../partials/topics") %>
 
                 <% if (settings && settings.about) { %>
                 <div class="about-box">
@@ -155,7 +136,9 @@
         var params = new URLSearchParams(window.location.search);
         var activeTag = params.get("tag") || "";
 
-        document.querySelectorAll(".tag-list .tag").forEach(function (tagEl) {
+        document.querySelectorAll(".tag-list a.tag").forEach(function (
+            tagEl,
+        ) {
             tagEl.addEventListener("click", function (e) {
                 if (this.dataset.filter !== activeTag) {
                     window.location.href = this.href;

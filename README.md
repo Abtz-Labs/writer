@@ -31,7 +31,7 @@ RATE_LIMIT_MAX=100
 - **RESTful API** with token authentication and self-discoverable docs at `GET /api`
 - **Admin Panel** at `/panel` — create, edit, delete, search posts
 - **Settings** at `/settings` — blog info, credentials, custom scripts, token rotation
-- **Tag support** with filtering on the home page
+- **Tag support** with filtering on the home page — the topic list collapses to one line on mobile so it never pushes posts off screen
 - **Open Graph images** — auto-generated 1200×630 social cards
 - **RSS feed** at `/feed.xml`
 - **Custom scripts** — inject analytics or other tags into `<head>`

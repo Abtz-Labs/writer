@@ -71,5 +71,32 @@ Confirmation tokens are persisted in JSLiteDB (`confirmations` collection) with 
 - Post body stored as Markdown, rendered to HTML via `marked` (GFM + breaks enabled).
 - Post model has three serialization methods: `toJSON()` (raw), `toApiJSON()` (adds `bodyHtml`), `toView()` (adds `bodyHtml` + `isPublished` + `firstImage`).
 - Layout: `views/layout.ejs` wraps all pages. Pages in `views/pages/`, partials in `views/partials/`.
+
+## Responsive Topic List
+
+The topic filter on `/` and `/search` is one shared partial,
+`views/partials/topics.ejs`, holding both the markup and its inline script. On
+mobile the list is capped to a single line so a long tag set cannot push the post
+list off screen; tapping a control expands it and the control becomes "Show less".
+
+- **Collapsed (mobile base)**: `.tag-list` is `flex-wrap: nowrap` with
+  `overflow: hidden`. A trailing `…` control sits absolutely at the right edge.
+- **Fade**: `.tag-list::after` is a gradient to `--color-bg`, twice the control's
+  width, reaching full opacity at the control's own width. The ramp therefore sits
+  entirely to the left of the control and chips are faded out before reaching it.
+- **Expanded**: `.is-expanded` on the list restores `flex-wrap: wrap`, drops the
+  fade, and returns the control to normal flow so "Show less" sizes to its label.
+- **Desktop (>= 769px)**: the control and the fade are both `display: none` and
+  the list is fully wrapped. No JS is involved, so the layout is viewport-driven.
+- **Overflow check**: the partial's script sets the control's `hidden` attribute
+  when the list does not overflow, so a blog with one or two topics shows no
+  control at all. Re-checked on `resize`.
+- **Accessibility**: the control is a `<button>` with `aria-expanded` and
+  `aria-controls`. The visible `…` is `aria-hidden`, and a visually hidden
+  "Show all topics" label supplies the accessible name, so the two states read as
+  "Show all topics" and "Show less".
+- Tag click handlers are scoped to `a.tag`, not `.tag`, so they do not match the
+  control despite it carrying the `.tag` class.
+
 - OG images: dynamically generated 1200×630 PNGs via `@napi-rs/canvas`. Cached in `public/og-images/`. Route `/og/:slug.png` serves post cards; `/og/site.png` serves the site-wide card.
 - RSS feed: `/feed.xml` returns valid RSS 2.0 with up to 20 published posts.

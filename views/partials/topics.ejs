@@ -1,0 +1,55 @@
+<% var hasActiveTag = typeof activeTag !== "undefined"; %>
+<div class="topics-box">
+    <h3 class="sidebar-title">Topics</h3>
+    <div class="tag-list" id="tag-list">
+        <a
+            href="/"
+            class="tag<%= hasActiveTag && !activeTag ? ' is-active' : '' %>"
+            data-filter=""
+            >All</a
+        >
+        <% tags.forEach(function(tag) { %>
+        <a
+            href="/?tag=<%= encodeURIComponent(tag) %>"
+            class="tag<%= hasActiveTag && activeTag === tag ? ' is-active' : '' %>"
+            data-filter="<%= tag %>"
+            ><%= tag.charAt(0).toUpperCase() + tag.slice(1) %></a
+        >
+        <% }); %>
+        <button
+            type="button"
+            class="tag tag-list-toggle"
+            aria-controls="tag-list"
+            aria-expanded="false"
+        >
+            <span class="tag-list-more" aria-hidden="true">…</span>
+            <span class="tag-list-more-text visually-hidden"
+                >Show all topics</span
+            >
+            <span class="tag-list-less">Show less</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var list = document.getElementById("tag-list");
+        var toggle = list && list.querySelector(".tag-list-toggle");
+        if (!toggle) return;
+
+        function sync() {
+            toggle.hidden =
+                !list.classList.contains("is-expanded") &&
+                list.scrollWidth <= list.clientWidth;
+        }
+
+        toggle.addEventListener("click", function () {
+            var expanded = list.classList.toggle("is-expanded");
+            toggle.setAttribute("aria-expanded", expanded ? "true" : "false");
+            sync();
+        });
+
+        sync();
+        window.addEventListener("resize", sync);
+    })();
+</script>

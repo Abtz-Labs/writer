@@ -32,6 +32,8 @@
 - Post cards with: title, excerpt, publication date, reading time, optional thumbnail (first image from post)
 - Pagination (10 posts per page)
 - Tag filtering
+- Topic list collapses to a single line on mobile, with a control to expand and
+  collapse it
 
 **Post Detail Page**
 
@@ -329,6 +331,7 @@
 8. **Security**: Passwords use scrypt, CSRF tokens on web forms, rate limiting on login/onboarding, drafts hidden from public API
 9. **Docker**: Application builds and runs in Docker container
 10. **TDD**: Tests exist for core functionality (metadata inference, auth, API, confirmation flow)
+11. **Mobile Topics**: Topic list is one line on mobile, expands and collapses on tap, and is hidden when it does not overflow; desktop is unaffected
 
 ## 8. Development Approach
 
