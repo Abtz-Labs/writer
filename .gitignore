@@ -22,3 +22,6 @@ index.php.bak
 # Misc
 .DS_Store
 bare.config.json
+
+# Bare Deploy release artifacts
+*.raspberrypi.local.zip
