@@ -2,101 +2,121 @@
 
 ## Request Flow
 
-Two route groups mounted in `app.js`:
+`index.php` runs top to bottom:
 
-- **Web routes** (`routes/web.js` → `GET /`): Serve HTML via EJS templates. A custom `res.render()` override in `app.js` wraps every page template in `views/layout.ejs` automatically. All web POST routes are protected by CSRF validation.
-- **API routes** (`routes/api.js` → `GET /api`): Return JSON. `GET /api` serves self-discoverable API docs. API routes are exempt from CSRF checks.
+1. **CLI-server guard** — when served by `php -S`, real files pass through and sensitive
+   ones (`tests.php`, `import.php`, `*.sqlite`, `*.env`, `.git`, `*.bak`) return `404`.
+   Mirrors the intent of `.htaccess`.
+2. **Configuration** — `define()` constants, `WRITER_DB_PATH`, section banners.
+3. **Bootstrap** — `bootSession()`, `initDatabase()`, security headers, `dispatch()`.
+   Under `WRITER_TESTING`, bootstrap returns early and the file acts as a library.
+
+`dispatch()` is a flat route table: `route($method, $pattern, $handler)` matches an
+anchored PCRE against `requestPath()` and calls the handler. API handlers return JSON;
+page handlers call `renderPage()`.
 
 ## Authentication
 
-- **First-time setup**: `POST /api/onboarding` or `/onboarding` web form — creates settings with a cryptographically random `auth_token` (256-bit hex).
-- **API auth**: Protected endpoints require `X-Auth-Token` header, validated by `middleware/auth.js` against the stored token.
-- **Web auth**: `cookie-session` stores `req.session.authToken` after login via `/login`. Session key from `SESSION_KEY` env var. Sessions use `httpOnly`, `sameSite=strict`, and `secure` in production.
-- **Two login methods**: auth token directly, or username/password (scrypt-hashed password in settings).
-- **Rate limiting**: Global 100 req/15min (skipped for authenticated users). Login is limited to 5 attempts per 15 min. Onboarding is limited to 5 per hour.
+- **First-time setup** — `POST /api/onboarding` (or the `/onboarding` form) creates the
+  settings row with a random `auth_token`, a hashed password, and a hashed recovery key.
+- **API auth** — protected endpoints require the `X-Auth-Token` header, compared with
+  `hash_equals`. `requireAuthRow($token)` is the single check; API route wrappers call
+  `requireAuth()` (header), and web handlers pass the session token explicitly.
+- **Web auth** — the session cookie stores the same token in `$_SESSION['authToken']`.
+  Login accepts username/password, the auth token, or the recovery key.
+- **Before setup** — while `onboarding_complete` is false, `dispatch()` redirects every
+  human-facing GET to `/onboarding`; API, feed and OG routes are exempt.
+- **Rate limiting** — a sliding-window limiter keyed by bucket + IP (`login` 5/15min,
+  `onboarding` 5/hour). Successful logins are never counted.
 
 ## Security Model
 
-| Concern             | Implementation                                                                                                                                                      |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Password hashing    | `crypto.scryptSync()` with random 16-byte salt per password. Format: `$scrypt$<salt>$<hash>`. Legacy SHA256 hashes are still verifiable for backward compatibility. |
-| Password comparison | `crypto.timingSafeEqual()` on equal-length buffers to prevent timing attacks.                                                                                       |
-| Auth tokens         | `crypto.randomBytes(32).toString('hex')` — never predictable.                                                                                                       |
-| CSRF                | Per-session token injected into all EJS templates as `csrfToken`. Validated on every non-API POST.                                                                  |
-| Session cookies     | `cookie-session` with `httpOnly: true`, `sameSite: 'strict'`, `secure: process.env.NODE_ENV === 'production'`.                                                      |
-| CSP                 | `defaultSrc 'self'`, `styleSrc 'self' 'unsafe-inline'`, `imgSrc 'self' data: https:`, `scriptSrc 'self' 'unsafe-inline'`, `scriptSrcAttr 'none'`.                   |
-| Rate limiting       | Global 100 req/15min (skipped for authenticated users) + login-specific 5 req/15min + onboarding 5 req/hour.                                                        |
-| Draft exposure      | Public API only returns `status === 'published'`. Draft slugs return 404 unless request carries a valid `X-Auth-Token`.                                             |
-| Token leak          | `GET /api/settings` strips `auth_token` from the response.                                                                                                          |
+| Concern             | Implementation                                                                                  |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| Password hashing    | bcrypt (`password_hash`). Legacy sha256 and `$scrypt$` (sodium) hashes verify and rehash on login. |
+| Password comparison | `password_verify`; the auth token and recovery key use `hash_equals`.                             |
+| Auth tokens         | `bin2hex(random_bytes(32))`.                                                                     |
+| CSRF                | Per-session token in every web form's `_csrf` field, checked by `verifyCsrf()` on web POSTs.     |
+| Sessions            | `HttpOnly`, `SameSite=Strict`, `Secure` when HTTPS, 24h lifetime, regenerated on login.          |
+| CSP                 | Built from defaults plus `csp_script_domains`; `script-src` allows `'self'`, `'unsafe-inline'`, `esm.sh`, `cdn.jsdelivr.net`. |
+| Draft exposure      | Public API and pages only return published posts; drafts 404 unless authenticated (preview).      |
+| Token leak          | `GET /api/settings` strips `auth_token` and `username`.                                           |
+| Recovery key        | sha256-hashed at rest, rotates on use.                                                            |
 
 ## Post Creation Pipeline
 
-When a post is created (`POST /api/posts`) or updated:
+On create/update (`inferMetadata()`):
 
-1. `metadata.inferMetadata()` — generates from title + body:
-   - **slug**: lowercase, alphanumeric + hyphens; conflicts resolved with `-1`, `-2` suffix via `generateUniqueSlugFromList()`
-   - **keywords**: top 10 words (3+ chars, excluding stop words) by frequency
-   - **meta_description**: first 160 chars of plain text (Markdown stripped)
-   - **reading_time**: `ceil(wordCount / 200)`, minimum 1
-   - **excerpt**: first 200 chars of plain text
-2. Post inserted into JSLiteDB `posts` collection.
+- **slug** — lowercase, alphanumerics + hyphens; collisions get `-1`, `-2` suffixes.
+- **keywords** — top 10 words (3+ chars, stop words removed) by frequency.
+- **meta_description** — first 160 chars of plain text.
+- **reading_time** — `ceil(wordCount / 200)`, minimum 1.
+- **excerpt** — first 200 chars of plain text (Markdown stripped).
 
 ## Post Timestamps
 
-Each post has three timestamp fields:
+- **created_at** — set on creation; never modified.
+- **updated_at** — set on create and update.
+- **published_at** — defaults to `created_at`; settable for scheduled dates. All ordering
+  uses `published_at` descending.
 
-- **created_at**: Set automatically when the post is created. Cannot be modified.
-- **updated_at**: Set automatically when the post is created or updated.
-- **published_at**: Controls when the post appears published. Defaults to `created_at` if not provided. Can be set via API or UI to schedule future publication dates. Posts are sorted by `published_at` descending.
+## Destructive Action Confirmation
 
-## Destructive Action Confirmation Flow
-
-Deleting a post or rotating the auth token requires a two-step confirmation:
-
-1. `DELETE /api/posts/:slug` or `POST /api/settings/rotate-token` returns `202 Accepted` with `{ confirmation_required: true, confirmation_url: "/api/confirm/<token>" }`.
-2. `POST /api/confirm/:token` with valid `X-Auth-Token` executes the pending action and deletes the confirmation token.
-3. Invalid or expired confirmation tokens return `410 Gone`.
-
-Confirmation tokens are persisted in JSLiteDB (`confirmations` collection) with a 10-minute TTL and lazy cleanup.
+`DELETE /api/posts/:slug` and `POST /api/settings/rotate-token` return `202` with a
+`confirmation_url`. An authenticated `POST` to that URL executes the action. Tokens live
+in the `confirmations` table with a 5-minute TTL and lazy cleanup; expired/invalid tokens
+return `410`.
 
 ## Data Layer
 
-- **JSLiteDB** singleton in `config/database.js` — stores JSON files in `storage/data/`. Access collections via `getCollection(name)`.
-- **Three collections**: `posts`, `settings` (single document with `id: 'settings'`), and `confirmations`.
-- Collection methods (`find`, `insert`, `update`, `delete`) are async. `find()` with no args returns all documents; `find({ key: value })` filters.
-- No schema validation — collections auto-created on first insert.
+SQLite via PDO, in `getDb()` (WAL, `busy_timeout`, `foreign_keys`). Three tables:
+
+- **posts** — the blog posts.
+- **settings** — a single row (`id = 'settings'`).
+- **confirmations** — pending destructive actions.
+- **posts_fts** — FTS5 virtual table (`tokenize='trigram'`) kept in sync by
+  `posts_ai` / `posts_ad` / `posts_au` triggers using the `'delete'` command. The importer
+  runs one `'rebuild'` after a bulk load; there is no boot-time rebuild.
+
+Migrations use `PRAGMA user_version` (currently v2).
 
 ## Rendering
 
-- Post body stored as Markdown, rendered to HTML via `marked` (GFM + breaks enabled).
-- Post model has three serialization methods: `toJSON()` (raw), `toApiJSON()` (adds `bodyHtml`), `toView()` (adds `bodyHtml` + `isPublished` + `firstImage`).
-- Layout: `views/layout.ejs` wraps all pages. Pages in `views/pages/`, partials in `views/partials/`.
+- Bodies are stored as Markdown; `renderBodyHtml()` = `sanitizeHtml(parseMarkdown($body))`.
+- The sanitizer is a faithful tokenizer port of the `xss` package (no `ext-dom`); it keeps
+  `<script src>` only for `gist.github.com` and strips everything else.
+- `renderPage()` builds the full HTML document: meta, Open Graph tags, inlined CSS, the
+  header, the page body, the footer, modals, and the highlight.js boot script.
+- Pages are built by `view*()` string builders (`viewIndex`, `viewPost`, `viewPanel`,
+  `viewSettings`, …). Output is escaped with `h()`.
+- Syntax highlighting is client-side: highlight.js loads from jsdelivr and runs
+  `hljs.highlightAll()`.
+
+## Search
+
+`searchPublishedPosts($q)` builds an FTS5 `MATCH` from quoted per-word terms (terms shorter
+than 3 chars are dropped, since a trigram index cannot match them) and orders by
+`bm25(posts_fts, 10, 6, 8, 7, 4, 1)` over title, slug, tags, keywords, excerpt and body.
+Queries under 3 chars fall back to a title `LIKE`. The admin panel uses the same expression
+over all posts (drafts included).
 
 ## Responsive Topic List
 
-The topic filter on `/` and `/search` is one shared partial,
-`views/partials/topics.ejs`, holding both the markup and its inline script. On
-mobile the list is capped to a single line so a long tag set cannot push the post
-list off screen; tapping a control expands it and the control becomes "Show less".
+The topic filter on `/` and `/search` is one shared builder (`viewTopics()`). On mobile the
+list is clipped to a single line with a `…` control; tapping expands it and the control
+becomes "Show less". From 769px up the list wraps and the control is hidden. The control's
+`hidden` attribute is set by an inline script when the list does not overflow.
 
-- **Collapsed (mobile base)**: `.tag-list` is `flex-wrap: nowrap` with
-  `overflow: hidden`. A trailing `…` control sits absolutely at the right edge.
-- **Fade**: `.tag-list::after` is a gradient to `--color-bg`, twice the control's
-  width, reaching full opacity at the control's own width. The ramp therefore sits
-  entirely to the left of the control and chips are faded out before reaching it.
-- **Expanded**: `.is-expanded` on the list restores `flex-wrap: wrap`, drops the
-  fade, and returns the control to normal flow so "Show less" sizes to its label.
-- **Desktop (>= 769px)**: the control and the fade are both `display: none` and
-  the list is fully wrapped. No JS is involved, so the layout is viewport-driven.
-- **Overflow check**: the partial's script sets the control's `hidden` attribute
-  when the list does not overflow, so a blog with one or two topics shows no
-  control at all. Re-checked on `resize`.
-- **Accessibility**: the control is a `<button>` with `aria-expanded` and
-  `aria-controls`. The visible `…` is `aria-hidden`, and a visually hidden
-  "Show all topics" label supplies the accessible name, so the two states read as
-  "Show all topics" and "Show less".
-- Tag click handlers are scoped to `a.tag`, not `.tag`, so they do not match the
-  control despite it carrying the `.tag` class.
+## OG Images and RSS
 
-- OG images: dynamically generated 1200×630 PNGs via `@napi-rs/canvas`. Cached in `public/og-images/`. Route `/og/:slug.png` serves post cards; `/og/site.png` serves the site-wide card.
-- RSS feed: `/feed.xml` returns valid RSS 2.0 with up to 20 published posts.
+- `/og/site.png` and `/og/:slug.png` render 1200×630 PNGs with GD (`generateOGImage()`),
+  cached in `og-images/` (gitignored) and served with `Cache-Control: max-age=86400`.
+  The cache is cleared on post update/delete and on settings/onboarding changes.
+- `/feed.xml` builds RSS 2.0 by hand (up to 20 published posts) with
+  `Cache-Control: max-age=3600`.
+
+## Gists
+
+`renderGistsInHtml()` replaces each gist `<script src>` in a rendered body with a styled
+embed. Gist JSON is fetched once and cached in `gist_cache` for an hour
+(`GIST_CACHE_TTL`). Code is escaped and given an `hljs language-*` hook.

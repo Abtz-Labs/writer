@@ -1,9 +1,0 @@
-node_modules
-data
-
-*.db
-.git
-*.md
-test
-*.log
-.env
