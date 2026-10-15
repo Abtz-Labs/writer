@@ -48,15 +48,21 @@ location / {
 Prefer Apache/Nginx + PHP-FPM: the web server already supervises PHP, so no separate
 process manager is required.
 
-If you run Writer with PHP's built-in server (for example a small appliance without
-php-fpm), use [Supervisor](http://supervisord.org/). This replaces the PM2 setup used by
-the previous Node version. A ready-to-edit sample lives in
-[`docs/supervisord.sample.conf`](../supervisord.sample.conf):
+If you run Writer with PHP's built-in server on the host (for example a small appliance
+without php-fpm), use [Supervisor](http://supervisord.org/). This replaces the PM2 setup
+used by the previous Node version. Run one `[program:]` per blog instance; a
+ready-to-edit sample lives in [`docs/supervisord.sample.conf`](../supervisord.sample.conf):
 
 ```bash
 sudo cp docs/supervisord.sample.conf /etc/supervisor/conf.d/writer.conf
+sudo mkdir -p /var/log/writer && sudo chown admin /var/log/writer
 sudo supervisorctl reread && sudo supervisorctl update
 ```
+
+The host needs PHP 8.1+ with `pdo_sqlite` (FTS5), `gd` (FreeType), `sodium` and
+`mbstring`. Set `opcache.enable_cli=1` in the PHP CLI ini. The built-in server is
+single-threaded; `PHP_CLI_SERVER_WORKERS` adds workers. `bare` restarts each program
+through `startScript` (`sudo -n supervisorctl restart <program> && curl … /api/health`).
 
 ## `bare.config.json`
 
@@ -64,10 +70,11 @@ Deployment uses [bare](https://github.com/abtz-Labs/bare). `bare.config.json` li
 
 - **Servers** — `raspberrypi.local` (user `admin`, SSH port 22), one entry per blog
   instance, each with its own `deployTo`, `webroot` (`<deployTo>/public_html`) and `type`
-  (`php`). `WRITER_DB_PATH` is written to `public_html/.htaccess` via `SetEnv` in
-  `postScripts`; the database lives in a `private/` directory beside the web root.
-- **`startScript`** — a health check against `http://localhost:PORT/api/health`. Adjust the
-  host/URL to the instance's reachable address.
+  (`php`). `WRITER_DB_PATH` and `WRITER_OG_DIR` are set in the Supervisor program's
+  `environment=` (see [`docs/supervisord.sample.conf`](../supervisord.sample.conf)),
+  pointing at `<deployTo>/shared/` so the database and OG cache survive deploys.
+- **`startScript`** — restarts the instance's Supervisor program, then checks
+  `http://127.0.0.1:PORT/api/health` with a retry.
 - **`keepReleases`** — 5.
 - **`ignore`** — dev-only files (`docs/*`, `tests.php`, `import.php`, `Justfile`,
   `package.json`, `LICENSE`, databases, `storage/*`, `og-images/*`, `.git/*`,

@@ -25,6 +25,10 @@
 | Variable          | Default                        | Purpose                                   |
 | ----------------- | ------------------------------ | ----------------------------------------- |
 | `WRITER_DB_PATH`  | `writer.sqlite` beside `index.php` | Path to the SQLite database file      |
+| `WRITER_OG_DIR`   | `og-images` beside `index.php`     | Directory for cached OG images        |
+
+Keep both paths outside the release directory (for example in `shared/`) so the
+database and the OG cache survive deploys.
 
 Everything else is configured in the app: the CSP is built from defaults plus
 `csp_script_domains`, and the session settings (lifetime, cookie flags) live in
@@ -34,7 +38,7 @@ Everything else is configured in the app: the CSP is built from defaults plus
 
 | Constant           | Value                  | Purpose                              |
 | ------------------ | ---------------------- | ------------------------------------ |
-| `APP_VERSION`      | `1.0.13`               | Version (mirrored in `package.json`) |
+| `APP_VERSION`      | `2.0.0`                | Version (mirrored in `package.json`) |
 | `SESSION_LIFETIME` | `86400`                | Session length in seconds            |
 | `PAGE_SIZE`        | `10`                   | Default API/page post count          |
 | `GIST_CACHE_TTL`   | `3600`                 | Gist cache lifetime in seconds       |

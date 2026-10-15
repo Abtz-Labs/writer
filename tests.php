@@ -175,8 +175,12 @@ function req(string $method, string $path, array $opts = []): array
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_HEADER => true,
         CURLOPT_FOLLOWLOCATION => false,
-        CURLOPT_CUSTOMREQUEST => $method,
     ];
+    if ($method === 'HEAD') {
+        $curlOpts[CURLOPT_NOBODY] = true;
+    } else {
+        $curlOpts[CURLOPT_CUSTOMREQUEST] = $method;
+    }
     if (!empty($opts['cookie'])) {
         $curlOpts[CURLOPT_COOKIEFILE] = $opts['cookie'];
         $curlOpts[CURLOPT_COOKIEJAR] = $opts['cookie'];
@@ -812,6 +816,11 @@ assertContains('Topic alpha', $r['body'], 'home lists a published post');
 assertContains('class="search-box"', $r['body'], 'home renders the search box');
 assertContains('<title>' . h(webSettings()['title']) . '</title>', $r['body'], 'home renders the blog title in <title>');
 
+$r = req('HEAD', '/');
+assertSame(200, $r['status'], 'HEAD / matches the GET route');
+$r = req('HEAD', '/api/health');
+assertSame(200, $r['status'], 'HEAD /api/health matches the GET route');
+
 $r = req('GET', '/?tag=alpha');
 assertContains('Topic alpha', $r['body'], 'tag filter keeps matching posts');
 assertNotContains('Topic beta', $r['body'], 'tag filter drops non-matching posts');
@@ -891,6 +900,7 @@ group('Footer Credits');
 $r = req('GET', '/');
 assertContains('Powered by', $r['body'], 'footer says "Powered by"');
 assertContains('>Writer</a>', $r['body'], 'footer credits Writer');
+assertContains('Writer</a> v.' . APP_VERSION, $r['body'], 'footer shows the Writer version');
 assertNotContains('API Docs', $r['body'], 'show_docs=false hides the API Docs link');
 
 // ─── WEB: SETTINGS UPDATE FORM ────────────────────────────

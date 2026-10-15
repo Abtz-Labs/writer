@@ -36,9 +36,9 @@ if (php_sapi_name() === 'cli-server') {
 // CONFIGURATION
 // ============================================================================
 
-define('APP_VERSION', '1.0.13');
+define('APP_VERSION', '2.0.0');
 define('DB_FILE', getenv('WRITER_DB_PATH') ?: __DIR__ . '/writer.sqlite');
-define('OG_DIR', __DIR__ . '/og-images');
+define('OG_DIR', getenv('WRITER_OG_DIR') ?: __DIR__ . '/og-images');
 define('OG_FONT', __DIR__ . '/assets/fonts/DejaVuSans.ttf');
 define('OG_FONT_BOLD', __DIR__ . '/assets/fonts/DejaVuSans-Bold.ttf');
 define('GIST_CACHE_TTL', 3600);
@@ -4597,7 +4597,7 @@ function viewFooter(array $settings): string
   $showDocs = ($settings['show_docs'] ?? null) !== false;
   $out = '<footer class="footer"><div class="container"><div class="block">'
     . '<p>&copy; ' . date('Y') . ' ' . h($settings['title'] ?? '') . '</p>'
-    . '<p>Powered by <a href="https://github.com/abtz-Labs/writer" target="_blank" rel="noopener noreferrer" class="brand">Writer</a></p>'
+    . '<p>Powered by <a href="https://github.com/abtz-Labs/writer" target="_blank" rel="noopener noreferrer" class="brand">Writer</a> v.' . h(APP_VERSION) . '</p>'
     . '</div><div class="block"><a href="/panel">Panel</a>';
   if ($showDocs) {
     $out .= '<a href="/docs" target="_blank" rel="noopener noreferrer">API Docs</a>';
@@ -6543,7 +6543,9 @@ function serveSettingsUpdateCredentials(array $m): never
 
 function route(string $method, string $pattern, callable $handler): bool
 {
-  if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== $method) {
+  $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+  // HEAD mirrors GET: same status and headers, no body.
+  if ($requestMethod !== $method && !($requestMethod === 'HEAD' && $method === 'GET')) {
     return false;
   }
   if (preg_match($pattern, requestPath(), $m)) {
@@ -7268,7 +7270,7 @@ function dispatch(): never
     $machine = str_starts_with($path, '/api')
       || $path === '/feed.xml'
       || str_starts_with($path, '/og/');
-    if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'GET' && !$machine && $path !== '/onboarding') {
+    if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true) && !$machine && $path !== '/onboarding') {
       redirect('/onboarding');
     }
   }
