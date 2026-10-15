@@ -4010,6 +4010,13 @@ main {
     margin: 0 auto;
 }
 
+.login-version {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--color-text-light);
+}
+
 /* ============================================
    Utilities (Mobile Default)
    ============================================ */
@@ -4597,7 +4604,7 @@ function viewFooter(array $settings): string
   $showDocs = ($settings['show_docs'] ?? null) !== false;
   $out = '<footer class="footer"><div class="container"><div class="block">'
     . '<p>&copy; ' . date('Y') . ' ' . h($settings['title'] ?? '') . '</p>'
-    . '<p>Powered by <a href="https://github.com/abtz-Labs/writer" target="_blank" rel="noopener noreferrer" class="brand">Writer</a> v.' . h(APP_VERSION) . '</p>'
+    . '<p>Powered by <a href="https://github.com/abtz-Labs/writer" target="_blank" rel="noopener noreferrer" class="brand">Writer</a></p>'
     . '</div><div class="block"><a href="/panel">Panel</a>';
   if ($showDocs) {
     $out .= '<a href="/docs" target="_blank" rel="noopener noreferrer">API Docs</a>';
@@ -5088,7 +5095,8 @@ function viewLogin(array $d): string
     . '<input type="password" id="token" name="token" autocomplete="current-password" '
     . ($d['tokenRequired'] ? 'required ' : '') . ($d['showUsername'] ? '' : 'autofocus ')
     . 'placeholder="Enter your auth token"></div>'
-    . '<button type="submit" class="button is-primary is-fullwidth">Login</button></div></form>';
+    . '<button type="submit" class="button is-primary is-fullwidth">Login</button></div></form>'
+    . '<p class="login-version">Writer #' . h(APP_VERSION) . '</p>';
   return $out;
 }
 

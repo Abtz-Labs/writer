@@ -900,7 +900,7 @@ group('Footer Credits');
 $r = req('GET', '/');
 assertContains('Powered by', $r['body'], 'footer says "Powered by"');
 assertContains('>Writer</a>', $r['body'], 'footer credits Writer');
-assertContains('Writer</a> v.' . APP_VERSION, $r['body'], 'footer shows the Writer version');
+assertNotContains('#' . APP_VERSION, $r['body'], 'footer no longer shows the Writer version');
 assertNotContains('API Docs', $r['body'], 'show_docs=false hides the API Docs link');
 
 // ─── WEB: SETTINGS UPDATE FORM ────────────────────────────
@@ -929,6 +929,8 @@ assertSame(200, $r['status'], 'GET /login returns 200');
 assertContains('name="_csrf"', $r['body'], 'login form embeds a CSRF token');
 assertContains('name="username"', $r['body'], 'login form shows the username field');
 assertContains('Enter your credentials', $r['body'], 'login form shows the subtitle');
+assertContains('class="login-version"', $r['body'], 'login page shows the version line');
+assertContains('Writer #' . APP_VERSION, $r['body'], 'login page shows the Writer version');
 
 $login = webLogin('s3cret-pw', 'admin', '198.51.100.10');
 assertSame(302, $login['post']['status'], 'valid credentials redirect');
