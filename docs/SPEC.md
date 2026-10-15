@@ -1,5 +1,10 @@
 # Blog WebApp Specification
 
+> **Note.** This document describes the original Node/Express implementation. Writer has
+> since been ported to a single-file PHP application (see the
+> [README](../README.md) and [docs/knowledge](knowledge/)). The sections below are kept for
+> reference; the stack, hashing, Docker and search points have been amended in the port.
+
 ## 1. Project Overview
 
 - **Project Name**: Writer
@@ -9,12 +14,12 @@
 
 ## 2. Tech Stack
 
-- **Runtime**: Node.js 18.x LTS
-- **Framework**: Express.js
-- **Templating**: EJS
-- **Database**: JSLiteDB (https://github.com/Abtz-Labs/jslitedb)
-- **Image Generation**: @napi-rs/canvas (zero-dependency Skia)
-- **Containerization**: Docker
+- **Runtime**: PHP 8.1+ (single-file application)
+- **Framework**: none — plain PHP
+- **Templating**: PHP string builders (no template engine)
+- **Database**: SQLite via PDO (FTS5 trigram index for search)
+- **Image Generation**: GD with FreeType (bundled DejaVu fonts)
+- **Containerization**: none (PHP-FPM behind Apache/Nginx; Supervisor optional)
 
 ## 3. UI/UX Specification
 
@@ -112,7 +117,7 @@
 
 - First visit triggers onboarding form
 - Configures: blog title, author name, description, username, password
-- Generates random auth token: `crypto.randomBytes(32).toString('hex')`
+- Generates random auth token: `bin2hex(random_bytes(32))`
 - Stores token in database
 - Returns token to user with instructions
 - Rate limited to 5 attempts per hour
@@ -122,7 +127,7 @@
 - API endpoints (except public GETs) require `X-Auth-Token` header
 - Web admin routes require session authentication via `/login`
 - Two login methods: auth token directly, or username/password
-- Passwords hashed with scrypt (salted, CPU-hard)
+- Passwords hashed with bcrypt; legacy scrypt/sha256 hashes verify and rehash on login
 - Invalid token returns 401
 - Login rate limited to 5 attempts per 15 minutes
 
@@ -165,7 +170,7 @@
 - `GET /og/:slug.png` — Generates 1200×630 PNG card for a post
 - `GET /og/site.png` — Generates site-wide OG card
 - Dark theme with auto-wrapping title and author byline
-- Cached in `public/og-images/` with 24h HTTP cache headers
+- Cached in `og-images/` with 24h HTTP cache headers
 - Cache invalidated on post update/delete and settings change
 
 **8. RSS Feed**
@@ -178,7 +183,7 @@
 **9. Custom Scripts**
 
 - Admin can inject raw HTML/script tags into every page `<head>`
-- Rendered unescaped in `views/layout.ejs`
+- Rendered unescaped in `renderPage()`
 - Useful for analytics, custom fonts, etc.
 
 ### Data Models
@@ -265,58 +270,29 @@
 
 ```
 /blog
-├── Dockerfile
-├── docker-compose.yml
-├── package.json
-├── .dockerignore
+├── index.php            # the whole application (single file)
+├── tests.php            # HTTP + unit test suite
+├── import.php           # one-time JSON→SQLite importer (gitignored, CLI-only)
+├── .htaccess            # Apache front controller + sensitive-file blocking
+├── Justfile             # start / stop / test
+├── package.json         # version mirror only
+├── LICENSE              # O'SAASy
 ├── README.md
-├── CLAUDE.md
 ├── AGENTS.md
-├── app.js
-├── .env.example
-├── /config
-│   └── database.js
-├── /controllers
-│   ├── postController.js
-│   └── settingsController.js
-├── /middleware
-│   ├── auth.js
-│   ├── webAuth.js
-│   └── errorHandler.js
-├── /models
-│   ├── post.js
-│   └── settings.js
-├── /routes
-│   ├── api.js
-│   └── web.js
-├── /services
-│   ├── confirmation.js
-│   ├── metadata.js
-│   └── ogImage.js
-├── /utils
-│   └── logger.js
-├── /views
-│   ├── /pages
-│   │   ├── index.ejs
-│   │   ├── post.ejs
-│   │   ├── search.ejs
-│   │   ├── onboarding.ejs
-│   │   ├── login.ejs
-│   │   ├── panel.ejs
-│   │   ├── settings.ejs
-│   │   ├── docs.ejs
-│   │   └── 404.ejs
-│   ├── /partials
-│   │   ├── header.ejs
-│   │   └── footer.ejs
-│   └── layout.ejs
-├── /public
-│   ├── /og-images
-│   └── /css
-│       └── style.css
-└── /test
-    ├── api.test.js
-    └── metadata.test.js
+├── bare.config.json     # deploy configuration
+├── writer.sqlite        # database (gitignored)
+├── /assets
+│   └── /fonts
+│       ├── DejaVuSans.ttf
+│       └── DejaVuSans-Bold.ttf
+├── /og-images           # Open Graph cache (gitignored)
+├── /storage             # only during migration: the old JSON store to import
+│   └── /data
+└── /docs
+    ├── SPEC.md
+    ├── /knowledge
+    ├── /memory
+    └── /plans
 ```
 
 ## 7. Acceptance Criteria
@@ -328,8 +304,8 @@
 5. **UI**: Home page shows post list; post page shows full article with proper styling
 6. **OG Images**: Social sharing cards are generated for posts and the site
 7. **RSS Feed**: /feed.xml returns valid RSS 2.0 with published posts
-8. **Security**: Passwords use scrypt, CSRF tokens on web forms, rate limiting on login/onboarding, drafts hidden from public API
-9. **Docker**: Application builds and runs in Docker container
+8. **Security**: Passwords use bcrypt (legacy hashes rehash on login), CSRF tokens on web forms, rate limiting on login/onboarding, drafts hidden from public API
+9. **Deployment**: Runs as a single PHP file under Apache/Nginx + PHP-FPM (Supervisor optional for the built-in server)
 10. **TDD**: Tests exist for core functionality (metadata inference, auth, API, confirmation flow)
 11. **Mobile Topics**: Topic list is one line on mobile, expands and collapses on tap, and is hidden when it does not overflow; desktop is unaffected
 
@@ -339,6 +315,6 @@
 2. Implement database layer
 3. Implement core services (metadata, OG images, confirmation)
 4. Build API routes
-5. Create EJS templates
-6. Add Docker configuration
+5. Build the pages and views
+6. Document the deployment
 7. Verify all acceptance criteria

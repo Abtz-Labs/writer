@@ -1,7 +1,27 @@
-storage/data
-node_modules/
-coverage/
-.env
-*.log
-logs/
+# Database files
+*.sqlite
+*.sqlite3
+*.sqlite-*
+*.db
+
+# Generated OG image cache
+og-images/
+
+# One-time importer and its source data (kept on disk, never committed)
+import.php
+storage/data/
+
+# Dev server
+.server.pid
+
+# Backups
+*.bak
+*.bkp
+index.php.bak
+
+# Misc
+.DS_Store
 bare.config.json
+
+# Bare Deploy release artifacts
+*.raspberrypi.local.zip

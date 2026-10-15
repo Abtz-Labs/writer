@@ -1,4 +1,8 @@
 status: done
+
+> Historical: this plan predates the PHP port and references the original Node stack
+> (EJS views, `public/css`). The feature itself still exists; see
+> [architecture](../knowledge/architecture.md#responsive-topic-list).
 ---
 
 # Mobile Topics Collapse

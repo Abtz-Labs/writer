@@ -1,0 +1,20 @@
+# Writer — Apache front controller (php-fpm / mod_php)
+Options -Indexes
+DirectoryIndex index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Never serve sensitive files
+  RewriteRule \.(sqlite3?(-(wal|shm))?|db|sql|env|bak|log)$ - [R=404,L]
+  RewriteRule ^(tests|import)\.php$ - [R=404,L]
+  RewriteRule (^|/)\. - [R=404,L]
+  # Front controller
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

@@ -3,29 +3,44 @@
 ## Development
 
 ```bash
-npm start              # Dev server with nodemon hot-reload (default port 8080)
-node app.js            # Production start
-node app.js -p 4000    # Custom port
+just start              # dev server on port 8080 (foreground)
+just start 3000         # dev server on a custom port
+just start background   # dev server in the background (writes .server.pid)
+just stop               # stop the background server
+```
+
+Without `just`:
+
+```bash
+php -S localhost:8080 index.php
+WRITER_DB_PATH=/var/data/writer.sqlite php -S localhost:8080 index.php
 ```
 
 ## Testing
 
 ```bash
-npm test               # Jest tests with coverage
-npm run test:watch     # Jest watch mode
-npx jest test/metadata.test.js              # Single test file
-npx jest --testNamePattern="slug generation" # Specific test by name
+just test               # run the suite
+php tests.php           # run the suite directly
 ```
+
+The suite spins up its own server on port 8091 with a temporary database.
+
+## Linting
+
+```bash
+php -l index.php
+php -l tests.php
+```
+
+## Importer
+
+```bash
+WRITER_DB_PATH=/path/to/writer.sqlite php import.php
+```
+
+One-time import of `storage/data/*.json` (the original Node store). Prints a dry-run count
+and a summary, and rebuilds the FTS index. `import.php` is gitignored and CLI-only.
 
 ## Deployment
 
-```bash
-npm run deploy         # Deploy using bare deploy
-bare deploy            # Direct bare deploy command
-```
-
-## Docker
-
-```bash
-docker-compose up      # Run in Docker
-```
+See [Deployment](deployment.md). Configuration is in `bare.config.json`.
